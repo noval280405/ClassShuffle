@@ -4,6 +4,12 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
     '@nuxt/icon' // <-- Tambahkan ini
   ],
+  // Masukkan konfigurasi Tailwind langsung di sini agar Nuxt tidak bingung
+  tailwindcss: {
+    config: {
+      darkMode: 'class'
+    }
+  },
   app: {
     head: {
       link: [
