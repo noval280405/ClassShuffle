@@ -1,5 +1,7 @@
+// tailwind.config.js
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: 'class', // <-- Baris ini yang paling penting!
   content: [
     "./components/**/*.{js,vue,ts}",
     "./layouts/**/*.vue",

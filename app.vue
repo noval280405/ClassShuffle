@@ -1,213 +1,444 @@
 <template>
-  <div class="min-h-screen bg-slate-900 text-slate-100 font-sans pb-12">
-    <header class="bg-slate-800/80 backdrop-blur-md border-b border-slate-700 sticky top-0 z-40 py-4 mb-8 shadow-lg">
-      <div class="container mx-auto px-4 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-          <span class="text-3xl animate-pulse">🌀</span>
-          <div>
-            <h1
-              class="text-2xl font-black bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent tracking-tight">
-              Kelompokin
-              <span
-                class="text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded ml-2">v2.1</span>
-            </h1>
-            <p class="text-xs text-slate-400">
-              Smart Group Randomizer & Manager
-            </p>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <main class="container mx-auto px-4 max-w-6xl">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div class="lg:col-span-4 space-y-6">
-          <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
-            <h2 class="text-lg font-bold mb-3 flex items-center gap-2 text-white">
-              🧑‍🎓 Input & Daftar Siswa
-            </h2>
-            <p class="text-xs text-slate-400 mb-3">
-              Ketik nama murid lalu tekan Enter atau klik Tambah.
-            </p>
-
-            <form @submit.prevent="addStudent" class="flex gap-2 mb-4">
-              <input v-model="newStudentName" type="text"
-                class="flex-1 bg-slate-900 border border-slate-600 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition placeholder-slate-500"
-                placeholder="Nama murid baru..." />
-              <button type="submit"
-                class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 rounded-xl text-sm font-bold transition flex items-center justify-center shadow-md shadow-indigo-900/20">
-                Tambah
-              </button>
-            </form>
-
-            <div class="mt-4 bg-slate-900/60 rounded-xl p-4 border border-slate-700/50 space-y-3">
-              <div class="flex justify-between text-xs font-medium border-b border-slate-700 pb-2">
-                <span class="text-slate-400">Total Terdaftar:</span>
-                <span class="text-white font-bold">{{ studentsList.length }} Siswa</span>
-              </div>
-
-              <div v-if="studentsList.length > 0"
-                class="max-h-72 overflow-y-auto space-y-2 pr-1 custom-scrollbar text-xs">
-                <div v-for="(student, index) in studentsList" :key="index"
-                  class="bg-slate-800 p-2.5 rounded-xl border border-slate-700/50 flex flex-col gap-2">
-                  <div class="flex justify-between items-center gap-2">
-                    <div v-if="editingIndex === index" class="flex-1 flex gap-1">
-                      <input v-model="editingName" type="text"
-                        class="w-full bg-slate-900 border border-indigo-500 rounded px-2 py-1 text-xs text-slate-200 outline-none"
-                        @keyup.enter="saveEdit(index)" />
-                      <button @click="saveEdit(index)" class="bg-emerald-600 p-1 rounded text-[10px] font-bold">
-                        Simpan
-                      </button>
-                      <button @click="cancelEdit" class="bg-slate-700 p-1 rounded text-[10px]">
-                        Batal
-                      </button>
-                    </div>
-
-                    <div v-else class="flex-1 flex items-center justify-between min-w-0">
-                      <span class="truncate font-medium pr-2" :class="student.hasGroup
-                          ? 'text-slate-400 line-through'
-                          : 'text-slate-200'
-                        ">
-                        {{ student.name }}
-                      </span>
-                      <span class="shrink-0 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider" :class="student.hasGroup
-                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                          : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                        ">
-                        {{ student.hasGroup ? "Sudah" : "Belum" }}
-                      </span>
-                    </div>
-
-                    <div v-if="editingIndex !== index" class="flex items-center gap-1 shrink-0">
-                      <button @click="startEdit(index, student.name)" title="Edit nama"
-                        class="text-slate-400 hover:text-indigo-400 p-1 hover:bg-indigo-500/10 rounded transition">
-                        ✏️
-                      </button>
-                      <button @click="deleteStudentFully(index, student.name)" title="Hapus permanen siswa"
-                        class="text-slate-400 hover:text-rose-400 p-1 hover:bg-rose-500/10 rounded transition">
-                        🗑️
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <p v-else class="text-center text-slate-500 py-4 text-xs">
-                Belum ada siswa dimasukkan.
+  <div :class="{ dark: isDarkMode }">
+    <div
+      class="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 font-sans pb-12 transition-colors duration-300"
+    >
+      <header
+        class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 sticky top-0 z-40 py-4 mb-8 shadow-sm dark:shadow-lg"
+      >
+        <div class="container mx-auto px-4 flex justify-between items-center">
+          <div class="flex items-center gap-3">
+            <i
+              class="fa-solid fa-shuffle text-2xl text-indigo-600 dark:text-indigo-400 animate-pulse"
+            ></i>
+            <div>
+              <h1
+                class="text-2xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-pink-400 bg-clip-text text-transparent tracking-tight"
+              >
+                Kelompokin
+                <span
+                  class="text-xs font-semibold bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded ml-2"
+                  >v3.0</span
+                >
+              </h1>
+              <p class="text-xs text-slate-500 dark:text-slate-400">
+                Multi-Class Group Manager
               </p>
             </div>
           </div>
 
-          <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
-            <h3 class="font-bold text-base mb-4 text-white flex items-center gap-2">
-              ⚙ Pengaturan Acak
-            </h3>
-
-            <div class="mb-4">
-              <label class="block text-xs font-semibold text-slate-400 mb-1.5">Metode Pembagian</label>
-              <select v-model="divideMethod"
-                class="w-full bg-slate-900 border border-slate-600 rounded-xl p-2.5 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none">
-                <option value="groupCount">Berdasarkan Jumlah Kelompok</option>
-                <option value="studentCount">
-                  Berdasarkan Jumlah Anggota per Kelompok
-                </option>
-              </select>
-            </div>
-
-            <div class="mb-6">
-              <label class="block text-xs font-semibold text-slate-400 mb-1.5">
-                {{
-                  divideMethod === "groupCount"
-                    ? "Target Jumlah Kelompok"
-                    : "Jumlah Anggota per Kelompok"
-                }}
-              </label>
-              <input type="number" v-model.number="targetNumber" min="1"
-                class="w-full bg-slate-900 border border-slate-600 rounded-xl p-2.5 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none" />
-            </div>
-
-            <button @click="generateGroups" :disabled="isSpinning || studentsList.length === 0"
-              class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 disabled:from-slate-700 disabled:to-slate-700 text-white font-bold py-3 px-4 rounded-xl transition shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2">
-              <span v-if="isSpinning" class="animate-spin text-lg">🌀</span>
-              {{ isSpinning ? "Mengacak..." : "🔥 Acak Kelompok!" }}
-            </button>
-          </div>
+          <button
+            @click="isDarkMode = !isDarkMode"
+            class="p-2.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-amber-400 hover:scale-105 transition flex items-center justify-center w-10 h-10"
+            title="Ubah Tema"
+          >
+            <i
+              :class="
+                isDarkMode
+                  ? 'fa-solid fa-sun text-lg'
+                  : 'fa-solid fa-moon text-lg'
+              "
+            ></i>
+          </button>
         </div>
+      </header>
 
-        <div class="lg:col-span-8">
-          <div v-if="groups.length === 0 && !isSpinning"
-            class="bg-slate-800 border-2 border-dashed border-slate-700 rounded-2xl p-16 text-center shadow-xl">
-            <span class="text-5xl block mb-4">✨</span>
-            <p class="text-slate-300 font-semibold text-lg">
-              Siap Memulai Pembagian Kelompok?
-            </p>
-            <p class="text-sm text-slate-500 mt-2 max-w-sm mx-auto">
-              Tulis daftar murid di sebelah kiri, tentukan setelan, lalu tekan
-              tombol Acak Kelompok.
-            </p>
-          </div>
+      <main class="container mx-auto px-4 max-w-6xl">
+        <section
+          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-xl mb-8"
+        >
+          <h2
+            class="text-lg font-bold mb-4 flex items-center gap-2 text-slate-950 dark:text-white"
+          >
+            <i class="fa-solid fa-graduation-cap text-indigo-500"></i> Manajemen
+            Kelas Guru
+          </h2>
 
-          <div v-if="isSpinning"
-            class="bg-slate-800 border border-slate-700 rounded-2xl p-16 text-center flex flex-col items-center justify-center space-y-4 shadow-xl">
-            <div class="w-16 h-16 border-4 border-t-purple-500 border-indigo-500/20 rounded-full animate-spin"></div>
-            <p
-              class="text-xl font-black bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent animate-pulse">
-              Menghitung Probabilitas Adil...
-            </p>
-          </div>
+          <div class="flex flex-col md:flex-row gap-4 items-end">
+            <form @submit.prevent="addClass" class="w-full md:w-1/3">
+              <label
+                class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5"
+                >Buat Kelas Baru</label
+              >
+              <div class="flex gap-2">
+                <input
+                  v-model="newClassName"
+                  type="text"
+                  class="flex-1 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition placeholder-slate-400"
+                  placeholder="Contoh: Kelas 10-A, Kelas 1"
+                />
+                <button
+                  type="submit"
+                  class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 rounded-xl text-sm font-bold transition flex items-center gap-1 shadow-md shrink-0"
+                >
+                  <i class="fa-solid fa-plus"></i> Tambah
+                </button>
+              </div>
+            </form>
 
-          <div v-if="groups.length > 0 && !isSpinning" class="space-y-6">
-            <div
-              class="bg-slate-800 border border-slate-700 rounded-2xl p-4 flex justify-between items-center shadow-xl">
-              <div>
-                <h2 class="text-lg font-bold text-white">🎉 Hasil Kelompok</h2>
-                <p class="text-xs text-slate-400">
-                  Terbentuk {{ groups.length }} kelompok. Anda bisa mengeluarkan
-                  siswa dari kelompok menggunakan tanda silang.
+            <div class="w-full md:w-2/3">
+              <label
+                class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5"
+                >Pilih Kelas yang Sedang Diajar</label
+              >
+              <div class="flex flex-wrap gap-2">
+                <div
+                  v-for="cls in classes"
+                  :key="cls.id"
+                  class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border transition cursor-pointer"
+                  :class="
+                    activeClassId === cls.id
+                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20'
+                      : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-200'
+                  "
+                  @click="selectClass(cls.id)"
+                >
+                  <span>{{ cls.name }}</span>
+                  <button
+                    @click.stop="removeClass(cls.id, cls.name)"
+                    class="text-slate-400 hover:text-rose-400 transition ml-1"
+                    title="Hapus kelas"
+                  >
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                  </button>
+                </div>
+                <p
+                  v-if="classes.length === 0"
+                  class="text-sm text-slate-400 italic py-2"
+                >
+                  Belum ada kelas. Silakan buat kelas terlebih dahulu di sebelah
+                  kiri.
                 </p>
               </div>
-              <button @click="openShareModal"
-                class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition shadow-md shadow-emerald-900/40 flex items-center gap-2">
-                🔗 Bagikan Link ke WA
-              </button>
+            </div>
+          </div>
+        </section>
+
+        <div v-if="activeClass" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div class="lg:col-span-4 space-y-6">
+            <div
+              class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-xl"
+            >
+              <h2
+                class="text-lg font-bold mb-1 flex items-center gap-2 text-slate-950 dark:text-white"
+              >
+                <i class="fa-solid fa-users text-purple-500"></i> Daftar Siswa:
+                <span class="text-indigo-600 dark:text-indigo-400">{{
+                  activeClass.name
+                }}</span>
+              </h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">
+                Masukkan nama murid di {{ activeClass.name }}
+              </p>
+
+              <form @submit.prevent="addStudent" class="flex gap-2 mb-4">
+                <input
+                  v-model="newStudentName"
+                  type="text"
+                  class="flex-1 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2.5 text-sm text-slate-900 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition placeholder-slate-400"
+                  placeholder="Nama murid baru..."
+                />
+                <button
+                  type="submit"
+                  class="bg-purple-600 hover:bg-purple-700 text-white px-4 rounded-xl text-sm font-bold transition flex items-center justify-center shadow-md shrink-0 w-11"
+                >
+                  <i class="fa-solid fa-user-plus"></i>
+                </button>
+              </form>
+
+              <div
+                class="mt-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl p-4 border border-slate-200 dark:border-slate-700/50 space-y-3"
+              >
+                <div
+                  class="flex justify-between text-xs font-medium border-b border-slate-200 dark:border-slate-700 pb-2"
+                >
+                  <span class="text-slate-500 dark:text-slate-400"
+                    >Total Terdaftar:</span
+                  >
+                  <span class="text-slate-950 dark:text-white font-bold"
+                    >{{ studentsList.length }} Siswa</span
+                  >
+                </div>
+
+                <div
+                  v-if="studentsList.length > 0"
+                  class="max-h-72 overflow-y-auto space-y-2 pr-1 custom-scrollbar text-xs"
+                >
+                  <div
+                    v-for="(student, index) in studentsList"
+                    :key="index"
+                    class="bg-white dark:bg-slate-800 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700/50 flex flex-col justify-center"
+                  >
+                    <div class="flex justify-between items-center gap-2">
+                      <div
+                        v-if="editingIndex === index"
+                        class="flex-1 flex gap-1"
+                      >
+                        <input
+                          v-model="editingName"
+                          type="text"
+                          class="w-full bg-slate-100 dark:bg-slate-900 border border-indigo-500 rounded px-2 py-1 text-xs text-slate-900 dark:text-slate-200 outline-none"
+                          @keyup.enter="saveEdit(index)"
+                        />
+                        <button
+                          @click="saveEdit(index)"
+                          class="bg-emerald-600 text-white px-2 py-0.5 rounded text-[10px] font-bold"
+                        >
+                          Simpan
+                        </button>
+                        <button
+                          @click="cancelEdit"
+                          class="bg-slate-400 dark:bg-slate-700 text-white px-2 py-0.5 rounded text-[10px]"
+                        >
+                          Batal
+                        </button>
+                      </div>
+
+                      <div
+                        v-else
+                        class="flex-1 flex items-center justify-between min-w-0"
+                      >
+                        <span
+                          class="truncate font-medium pr-2"
+                          :class="
+                            student.hasGroup
+                              ? 'text-slate-400 dark:text-slate-500 line-through'
+                              : 'text-slate-800 dark:text-slate-200'
+                          "
+                        >
+                          {{ student.name }}
+                        </span>
+                        <span
+                          class="shrink-0 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider border"
+                          :class="
+                            student.hasGroup
+                              ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20'
+                              : 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/20'
+                          "
+                        >
+                          {{ student.hasGroup ? "Sudah" : "Belum" }}
+                        </span>
+                      </div>
+
+                      <div
+                        v-if="editingIndex !== index"
+                        class="flex items-center gap-1 shrink-0"
+                      >
+                        <button
+                          @click="startEdit(index, student.name)"
+                          class="text-slate-400 hover:text-indigo-500 dark:hover:text-indigo-400 p-1 rounded transition"
+                          title="Edit nama"
+                        >
+                          <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button
+                          @click="deleteStudentFully(index, student.name)"
+                          class="text-slate-400 hover:text-rose-500 p-1 rounded transition"
+                          title="Hapus permanen"
+                        >
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <p
+                  v-else
+                  class="text-center text-slate-400 py-4 text-xs italic"
+                >
+                  Belum ada siswa di kelas ini.
+                </p>
+              </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div v-for="(group, idx) in groups" :key="idx"
-                class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-md hover:border-slate-600 transition flex flex-col justify-between">
+            <div
+              class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-xl"
+            >
+              <h3
+                class="font-bold text-base mb-4 text-slate-950 dark:text-white flex items-center gap-2"
+              >
+                <i class="fa-solid fa-sliders text-indigo-500"></i> Setelan
+                Pembagian
+              </h3>
+
+              <div class="mb-4">
+                <label
+                  class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5"
+                  >Metode Pembagian</label
+                >
+                <select
+                  v-model="divideMethod"
+                  class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 text-sm text-slate-900 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+                >
+                  <option value="groupCount">
+                    Berdasarkan Jumlah Kelompok
+                  </option>
+                  <option value="studentCount">
+                    Berdasarkan Jumlah Anggota per Kelompok
+                  </option>
+                </select>
+              </div>
+
+              <div class="mb-6">
+                <label
+                  class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5"
+                >
+                  {{
+                    divideMethod === "groupCount"
+                      ? "Target Jumlah Kelompok"
+                      : "Jumlah Anggota per Kelompok"
+                  }}
+                </label>
+                <input
+                  type="number"
+                  v-model.number="targetNumber"
+                  min="1"
+                  class="w-full bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl p-2.5 text-sm text-slate-900 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+                />
+              </div>
+
+              <button
+                @click="generateGroups"
+                :disabled="isSpinning || activeClass.students.length === 0"
+                class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-slate-300 dark:disabled:from-slate-700 text-white font-bold py-3 px-4 rounded-xl transition shadow-lg flex items-center justify-center gap-2"
+              >
+                <i
+                  v-if="isSpinning"
+                  class="fa-solid fa-spinner animate-spin"
+                ></i>
+                <i v-else class="fa-solid fa-wand-magic-sparkles"></i>
+                {{ isSpinning ? "Mengacak Kelas..." : "Acak Kelompok!" }}
+              </button>
+            </div>
+          </div>
+
+          <div class="lg:col-span-8">
+            <div
+              v-if="groups.length === 0 && !isSpinning"
+              class="bg-white dark:bg-slate-800 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl p-16 text-center shadow-xl"
+            >
+              <i
+                class="fa-solid fa-layer-group text-5xl text-slate-300 dark:text-slate-600 block mx-auto mb-4"
+              ></i>
+              <p
+                class="text-slate-700 dark:text-slate-300 font-semibold text-lg"
+              >
+                Kelompok Belum Diacak
+              </p>
+              <p class="text-sm text-slate-400 mt-2 max-w-sm mx-auto">
+                Tentukan setelan pembagian di sebelah kiri lalu klik tombol Acak
+                Kelompok.
+              </p>
+            </div>
+
+            <div
+              v-if="isSpinning"
+              class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-16 text-center flex flex-col items-center justify-center space-y-4 shadow-xl"
+            >
+              <i
+                class="fa-solid fa-arrows-rotate text-4xl text-indigo-500 animate-spin"
+              ></i>
+              <p
+                class="text-xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent animate-pulse"
+              >
+                Menyusun Kombinasi Adil...
+              </p>
+            </div>
+
+            <div v-if="groups.length > 0 && !isSpinning" class="space-y-6">
+              <div
+                class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 flex justify-between items-center shadow-xl"
+              >
                 <div>
-                  <div class="flex justify-between items-center border-b border-slate-700 pb-3 mb-3">
-                    <h3
-                      class="font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-pink-400 text-lg">
-                      Kelompok {{ idx + 1 }}
-                    </h3>
-                    <span
-                      class="text-xs bg-slate-900 px-2.5 py-1 rounded-full text-slate-400 border border-slate-700 font-medium">
-                      {{ group.length }} Anggota
-                    </span>
-                  </div>
+                  <h2
+                    class="text-lg font-bold text-slate-950 dark:text-white flex items-center gap-2"
+                  >
+                    <i
+                      class="fa-solid fa-champagne-glasses text-emerald-500"
+                    ></i>
+                    Kelompok Terbentuk
+                  </h2>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">
+                    Klik ikon silang (x) di nama siswa untuk mengeluarkan mereka
+                    dari kelompok.
+                  </p>
+                </div>
+                <button
+                  @click="openShareModal"
+                  class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition shadow-md flex items-center gap-1.5"
+                >
+                  <i class="fa-solid fa-share-nodes"></i> Bagikan ke WA
+                </button>
+              </div>
 
-                  <ul class="space-y-2">
-                    <li v-for="(studentName, sIdx) in group" :key="studentName"
-                      class="group/item flex justify-between items-center text-sm bg-slate-900/60 hover:bg-slate-900 text-slate-300 px-3 py-2.5 rounded-xl border border-slate-700/50 transition">
-                      <span class="font-medium truncate max-w-[80%]">{{
-                        studentName
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div
+                  v-for="(group, idx) in groups"
+                  :key="idx"
+                  class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-md hover:border-slate-400 dark:hover:border-slate-600 transition flex flex-col justify-between"
+                >
+                  <div>
+                    <div
+                      class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700 pb-3 mb-3"
+                    >
+                      <h3
+                        class="font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-pink-400 text-lg"
+                      >
+                        Kelompok {{ idx + 1 }}
+                      </h3>
+                      <span
+                        class="text-xs bg-slate-100 dark:bg-slate-900 px-2.5 py-1 rounded-full text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 font-medium"
+                      >
+                        {{ group.length }} Anggota
+                      </span>
+                    </div>
+
+                    <ul class="space-y-2">
+                      <li
+                        v-for="(studentName, sIdx) in group"
+                        :key="studentName"
+                        class="group/item flex justify-between items-center text-sm bg-slate-50 dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700/50 transition"
+                      >
+                        <span class="font-medium truncate max-w-[80%]">{{
+                          studentName
                         }}</span>
-
-                      <button @click="removeStudentFromGroup(idx, sIdx)" title="Keluarkan dari kelompok"
-                        class="text-slate-500 hover:text-rose-400 opacity-100 md:opacity-0 group-hover/item:opacity-100 transition p-1 hover:bg-rose-500/10 rounded-lg">
-                        ❌
-                      </button>
-                    </li>
-                  </ul>
+                        <button
+                          @click="removeStudentFromGroup(idx, sIdx)"
+                          class="text-slate-400 hover:text-rose-500 opacity-100 md:opacity-0 group-hover/item:opacity-100 transition p-0.5"
+                        >
+                          <i class="fa-solid fa-xmark"></i>
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </main>
 
-    <ShareModal :is-open="isModalOpen" :share-url="generatedShareUrl" @close="isModalOpen = false" />
+        <div
+          v-else
+          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-16 text-center shadow-xl"
+        >
+          <i
+            class="fa-solid fa-arrow-pointer text-5xl text-indigo-500 block mx-auto mb-4 animate-bounce"
+          ></i>
+          <h3 class="text-lg font-bold text-slate-950 dark:text-white">
+            Pilih atau Buat Kelas Terlebih Dahulu
+          </h3>
+          <p class="text-sm text-slate-400 mt-2">
+            Gunakan panel atas untuk memilih kelas yang ingin dikelola.
+          </p>
+        </div>
+      </main>
+
+      <ShareModal
+        :is-open="isModalOpen"
+        :share-url="generatedShareUrl"
+        @close="isModalOpen = false"
+      />
+    </div>
   </div>
 </template>
 
@@ -215,133 +446,162 @@
 import { ref, computed, onMounted, watch } from "vue";
 import ShareModal from "~/components/ShareModal.vue";
 
-// State Array baru untuk menyimpan list nama tunggal
-const students = ref([]);
-const newStudentName = ref("");
+const isDarkMode = ref(true);
+const classes = ref([]);
+const activeClassId = ref(null);
 
-// State untuk keperluan inline edit nama siswa
+const newClassName = ref("");
+const newStudentName = ref("");
 const editingIndex = ref(null);
 const editingName = ref("");
 
 const divideMethod = ref("groupCount");
 const targetNumber = ref(5);
 const isSpinning = ref(false);
-const groups = ref([]);
 
 const isModalOpen = ref(false);
 const generatedShareUrl = ref("");
 
-// Computed property untuk memetakan nama siswa & status dapet kelompok
+const activeClass = computed(() => {
+  return classes.value.find((cls) => cls.id === activeClassId.value) || null;
+});
+
 const studentsList = computed(() => {
-  return students.value.map((name) => {
-    const foundInGroup = groups.value.some((group) => group.includes(name));
-    return {
-      name: name,
-      hasGroup: foundInGroup,
-    };
+  if (!activeClass.value) return [];
+  return activeClass.value.students.map((name) => {
+    const foundInGroup =
+      activeClass.value.groups?.some((group) => group.includes(name)) || false;
+    return { name, hasGroup: foundInGroup };
   });
 });
 
-// Lifecycle: Ambil data array dari LocalStorage saat app diload
+const groups = computed({
+  get: () => activeClass.value?.groups || [],
+  set: (val) => {
+    if (activeClass.value) activeClass.value.groups = val;
+  },
+});
+
 onMounted(() => {
-  const savedData = localStorage.getItem("kelompokin_array_v3");
-  if (savedData) {
-    students.value = JSON.parse(savedData);
+  const savedDarkMode = localStorage.getItem("kelompokin_darkmode");
+  if (savedDarkMode !== null) isDarkMode.value = JSON.parse(savedDarkMode);
+
+  const savedClasses = localStorage.getItem("kelompokin_multiclass_v3");
+  if (savedClasses) {
+    classes.value = JSON.parse(savedClasses);
+    if (classes.value.length > 0) activeClassId.value = classes.value[0].id;
   }
 });
 
-// Simpan data otomatis ke localStorage tiap ada perubahan list siswa
+watch(isDarkMode, (newVal) =>
+  localStorage.setItem("kelompokin_darkmode", newVal),
+);
 watch(
-  students,
+  classes,
   (newVal) => {
-    localStorage.setItem("kelompokin_array_v3", JSON.stringify(newVal));
+    localStorage.setItem("kelompokin_multiclass_v3", JSON.stringify(newVal));
   },
   { deep: true },
 );
 
-// Fungsi Tambah Siswa ke Array
-const addStudent = () => {
-  const name = newStudentName.value.trim();
+const addClass = () => {
+  const name = newClassName.value.trim();
   if (!name) return;
 
-  // Validasi agar tidak ada nama duplikat yang sama persis
-  if (students.value.includes(name)) {
-    alert("Nama siswa ini sudah terdaftar!");
+  if (classes.value.some((c) => c.name.toLowerCase() === name.toLowerCase())) {
+    alert("Nama kelas sudah ada!");
     return;
   }
 
-  students.value.push(name);
-  newStudentName.value = ""; // Reset text field
+  const newClassObj = { id: Date.now(), name, students: [], groups: [] };
+  classes.value.push(newClassObj);
+  activeClassId.value = newClassObj.id;
+  newClassName.value = "";
 };
 
-// Fungsi Trigger Start Edit Nama Siswa
+const selectClass = (id) => {
+  activeClassId.value = id;
+  cancelEdit();
+};
+
+const removeClass = (id, name) => {
+  if (confirm(`Hapus seluruh data ${name} beserta daftar siswanya?`)) {
+    classes.value = classes.value.filter((c) => c.id !== id);
+    if (activeClassId.value === id) {
+      activeClassId.value =
+        classes.value.length > 0 ? classes.value[0].id : null;
+    }
+    cancelEdit();
+  }
+};
+
+const addStudent = () => {
+  const name = newStudentName.value.trim();
+  if (!name || !activeClass.value) return;
+
+  if (activeClass.value.students.includes(name)) {
+    alert("Siswa dengan nama tersebut sudah ada di kelas ini!");
+    return;
+  }
+
+  activeClass.value.students.push(name);
+  newStudentName.value = "";
+};
+
 const startEdit = (index, currentName) => {
   editingIndex.value = index;
   editingName.value = currentName;
 };
 
-// Fungsi Simpan Hasil Edit Nama Siswa
 const saveEdit = (index) => {
   const cleanNewName = editingName.value.trim();
-  if (!cleanNewName) return;
+  if (!cleanNewName || !activeClass.value) return;
 
-  const oldName = students.value[index];
+  const oldName = activeClass.value.students[index];
+  activeClass.value.students[index] = cleanNewName;
 
-  // Update data di array utama siswa
-  students.value[index] = cleanNewName;
-
-  // Update juga nama di dalam kartu kelompok aktif agar tidak hilang sinkronisasinya
-  groups.value = groups.value.map((group) =>
-    group.map((member) => (member === oldName ? cleanNewName : member)),
-  );
-
+  if (activeClass.value.groups) {
+    activeClass.value.groups = activeClass.value.groups.map((group) =>
+      group.map((member) => (member === oldName ? cleanNewName : member)),
+    );
+  }
   cancelEdit();
 };
 
-// Batalkan Edit
 const cancelEdit = () => {
   editingIndex.value = null;
   editingName.value = "";
 };
 
-// Fungsi Hapus Permanen Siswa dari Daftar & Kelompok
 const deleteStudentFully = (index, studentName) => {
-  if (confirm(`Hapus ${studentName} secara permanen dari sistem?`)) {
-    // 1. Hapus dari list daftar utama siswa
-    students.value.splice(index, 1);
-
-    // 2. Bersihkan juga dari grup jika dia sudah masuk grup
-    groups.value = groups.value
-      .map((group) => group.filter((member) => member !== studentName))
-      .filter((group) => group.length > 0); // Hapus grup jika kosong
-
+  if (confirm(`Hapus ${studentName} dari kelas ${activeClass.value.name}?`)) {
+    activeClass.value.students.splice(index, 1);
+    if (activeClass.value.groups) {
+      activeClass.value.groups = activeClass.value.groups
+        .map((group) => group.filter((member) => member !== studentName))
+        .filter((group) => group.length > 0);
+    }
     cancelEdit();
   }
 };
 
-// Algoritma Pengacakan Berdasarkan State Array Tunggal Siswa
 const generateGroups = () => {
-  if (students.value.length === 0) return;
+  if (!activeClass.value || activeClass.value.students.length === 0) return;
   isSpinning.value = true;
-  groups.value = [];
+  activeClass.value.groups = [];
 
   setTimeout(() => {
-    // Ambil salinan array nama murni
-    let poolNames = [...students.value];
+    let poolNames = [...activeClass.value.students];
 
-    // Fisher-Yates Shuffle
     for (let i = poolNames.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [poolNames[i], poolNames[j]] = [poolNames[j], poolNames[i]];
     }
 
     const localGroups = [];
-
     if (divideMethod.value === "groupCount") {
       const numGroups = Math.max(1, targetNumber.value);
-      for (let i = 0; i < numGroups; i++) {
-        localGroups.push([]);
-      }
+      for (let i = 0; i < numGroups; i++) localGroups.push([]);
       poolNames.forEach((name, index) => {
         localGroups[index % numGroups].push(name);
       });
@@ -357,16 +617,14 @@ const generateGroups = () => {
   }, 1200);
 };
 
-// Keluarkan siswa dari kelompok (Otomatis mendeteksi status 'Belum dapet kelompok' kembali)
 const removeStudentFromGroup = (groupIndex, studentIndex) => {
-  groups.value[groupIndex].splice(studentIndex, 1);
-
-  if (groups.value[groupIndex].length === 0) {
-    groups.value.splice(groupIndex, 1);
+  if (!activeClass.value) return;
+  activeClass.value.groups[groupIndex].splice(studentIndex, 1);
+  if (activeClass.value.groups[groupIndex].length === 0) {
+    activeClass.value.groups.splice(groupIndex, 1);
   }
 };
 
-// Fitur Enkripsi Share Link
 const openShareModal = () => {
   const base64Data = btoa(JSON.stringify(groups.value));
   const origin = window.location.origin;
@@ -379,17 +637,13 @@ const openShareModal = () => {
 .custom-scrollbar::-webkit-scrollbar {
   width: 5px;
 }
-
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: #1e293b;
-  border-radius: 10px;
+  background: transparent;
 }
-
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: #475569;
   border-radius: 10px;
 }
-
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #6366f1;
 }
