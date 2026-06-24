@@ -6,7 +6,7 @@
       <div class="container mx-auto px-4 flex justify-between items-center">
         <div class="flex items-center gap-3">
           <i
-            class="fa-solid fa-shuffle text-2xl text-indigo-600 dark:text-indigo-400 animate-pulse"
+            class="fa-solid fa-shuffle text-2xl text-indigo-600 dark:text-indigo-400"
           ></i>
           <div>
             <h1
@@ -77,7 +77,7 @@
                 v-model="newClassName"
                 type="text"
                 class="flex-1 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition placeholder-slate-400"
-                placeholder="Contoh: Pemrograman Web A"
+                placeholder="Contoh: 1A"
               />
               <button
                 type="submit"
@@ -167,17 +167,17 @@
                   >Total Terdaftar:</span
                 >
                 <span class="text-slate-950 dark:text-white font-bold"
-                  >{{ studentsList.length }} Mahasiswa</span
+                  >{{ studentsList?.length || 0 }} Mahasiswa</span
                 >
               </div>
 
               <div
-                v-if="studentsList.length > 0"
+                v-if="studentsList && studentsList.length > 0"
                 class="max-h-72 overflow-y-auto space-y-2 pr-1 custom-scrollbar text-xs"
               >
                 <div
                   v-for="(student, index) in studentsList"
-                  :key="index"
+                  :key="student.id"
                   class="bg-white dark:bg-slate-800 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700/50 flex flex-col justify-center"
                 >
                   <div class="flex justify-between items-center gap-2">
@@ -297,7 +297,7 @@
             </div>
             <button
               @click="generateGroups"
-              :disabled="isSpinning || activeClass.students.length === 0"
+              :disabled="isSpinning || studentsListRaw.length === 0"
               class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-slate-300 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition flex items-center justify-center gap-2"
             >
               <i v-if="isSpinning" class="fa-solid fa-spinner animate-spin"></i>
@@ -443,9 +443,9 @@ const isDarkMode = inject("isDarkMode");
 const currentUser = ref(null);
 
 // State Data Dashboard
-const classes = ref([]); // Menyimpan daftar kelas [{ id: '1A', name: '1A' }]
+const classes = ref([]);
 const activeClassId = ref(null);
-const studentsListRaw = ref([]); // Menyimpan data siswa asli dari Firestore [{ id: 'muhammad-noval', name: 'Muhammad Noval' }]
+const studentsListRaw = ref([]);
 
 const newClassName = ref("");
 const newStudentName = ref("");
@@ -458,7 +458,7 @@ const isSpinning = ref(false);
 const isModalOpen = ref(false);
 const generatedShareUrl = ref("");
 
-// Helper untuk membuat ID unik (slug) dari nama siswa
+// Helper untuk membuat ID unik (slug) dari nama siswa (ex: Muhammad Noval -> muhammad-noval)
 const generateSlug = (name) => {
   return name
     .toLowerCase()
@@ -473,9 +473,9 @@ const activeClass = computed(() => {
   return classes.value.find((cls) => cls.id === activeClassId.value) || null;
 });
 
-// Mengolah daftar siswa untuk mendeteksi apakah sudah masuk kelompok atau belum
 const studentsList = computed(() => {
-  return studentsListRaw.value.map((student) => {
+  const rawList = studentsListRaw.value || [];
+  return rawList.map((student) => {
     const foundInGroup =
       activeClass.value?.groups?.some((group) =>
         group.includes(student.name),
@@ -489,7 +489,7 @@ const groups = computed({
   set: async (val) => {
     if (activeClass.value) {
       activeClass.value.groups = val;
-      // Simpan perubahan formasi kelompok ke dokumen kelas terkait
+      // Solusi: Mengubah array 2 dimensi menjadi String agar Firebase tidak mengembalikan error nested array
       const classDocRef = doc(
         $db,
         "users_data",
@@ -497,7 +497,7 @@ const groups = computed({
         "classes",
         activeClassId.value,
       );
-      await updateDoc(classDocRef, { groups: val });
+      await updateDoc(classDocRef, { groups: JSON.stringify(val) });
     }
   },
 });
@@ -509,19 +509,30 @@ onMounted(() => {
   }
 });
 
-// 1. AMBIL DAFTAR KELAS
+// 1. AMBIL DAFTAR KELAS DARI FIRESTORE
 const fetchClassesFromCloud = async (uid) => {
   try {
     const classesCollRef = collection($db, "users_data", uid, "classes");
     const querySnapshot = await getDocs(classesCollRef);
     const localClasses = [];
+
     querySnapshot.forEach((doc) => {
-      localClasses.push({
-        id: doc.id,
-        name: doc.id,
-        groups: doc.data().groups || [],
-      });
+      const data = doc.data();
+      let parsedGroups = [];
+
+      if (data.groups) {
+        try {
+          parsedGroups =
+            typeof data.groups === "string"
+              ? JSON.parse(data.groups)
+              : data.groups;
+        } catch (e) {
+          console.error("Gagal parse data kelompok:", e);
+        }
+      }
+      localClasses.push({ id: doc.id, name: doc.id, groups: parsedGroups });
     });
+
     classes.value = localClasses;
     if (classes.value.length > 0) {
       selectClass(classes.value[0].id);
@@ -559,9 +570,9 @@ const selectClass = async (id) => {
   }
 };
 
-// 3. TAMBAH KELAS BARU (Membuat dokumen kelas kosong)
+// 3. TAMBAH KELAS BARU
 const addClass = async () => {
-  const name = newClassName.value.trim(); // Contoh: "1A"
+  const name = newClassName.value.trim();
   if (!name || !currentUser.value) return;
 
   if (classes.value.some((c) => c.id.toLowerCase() === name.toLowerCase())) {
@@ -577,7 +588,8 @@ const addClass = async () => {
       "classes",
       name,
     );
-    await setDoc(classDocRef, { groups: [] });
+    // Kirim string array kosong ke Firebase
+    await setDoc(classDocRef, { groups: "[]" });
 
     classes.value.push({ id: name, name: name, groups: [] });
     activeClassId.value = name;
@@ -611,20 +623,19 @@ const removeClass = async (id, name) => {
   }
 };
 
-// 5. TAMBAH SISWA BARU (Struktur baru dengan custom ID slug)
+// 5. TAMBAH SISWA BARU (Dengan Custom ID Slug)
 const addStudent = async () => {
   const name = newStudentName.value.trim();
   if (!name || !activeClassId.value || !currentUser.value) return;
 
-  const studentId = generateSlug(name); // Hasil: muhammad-noval
+  const studentId = generateSlug(name);
 
   if (studentsListRaw.value.some((s) => s.id === studentId)) {
-    alert("Siswa dengan ID ini sudah terdaftar!");
+    alert("Siswa dengan nama/ID ini sudah terdaftar!");
     return;
   }
 
   try {
-    // Path: /users_data/iduser/classes/1A/nama_siswa/muhammad-noval
     const studentDocRef = doc(
       $db,
       "users_data",
@@ -663,15 +674,12 @@ const saveEdit = async (index) => {
   try {
     const baseRef = `users_data/${currentUser.value.uid}/classes/${activeClassId.value}/nama_siswa`;
 
-    // Hapus data dokumen lama jika ID barunya berubah
     if (oldStudent.id !== newStudentId) {
       await deleteDoc(doc($db, baseRef, oldStudent.id));
     }
 
-    // Setel dokumen dengan ID baru/update nama
     await setDoc(doc($db, baseRef, newStudentId), { nama_siswa: cleanNewName });
 
-    // Update grup lokal jika siswa tersebut sudah masuk kelompok
     if (activeClass.value?.groups) {
       activeClass.value.groups = activeClass.value.groups.map((group) =>
         group.map((member) =>
@@ -685,7 +693,9 @@ const saveEdit = async (index) => {
         "classes",
         activeClassId.value,
       );
-      await updateDoc(classDocRef, { groups: activeClass.value.groups });
+      await updateDoc(classDocRef, {
+        groups: JSON.stringify(activeClass.value.groups),
+      });
     }
 
     studentsListRaw.value[index] = { id: newStudentId, name: cleanNewName };
@@ -725,7 +735,9 @@ const deleteStudentFully = async (index, studentName) => {
           "classes",
           activeClassId.value,
         );
-        await updateDoc(classDocRef, { groups: activeClass.value.groups });
+        await updateDoc(classDocRef, {
+          groups: JSON.stringify(activeClass.value.groups),
+        });
       }
       cancelEdit();
     } catch (err) {
@@ -734,7 +746,7 @@ const deleteStudentFully = async (index, studentName) => {
   }
 };
 
-// 8. ACAK KELOMPOK (Menggunakan list siswa yang ditarik dari Firestore)
+// 8. ACAK KELOMPOK
 const generateGroups = () => {
   if (studentsListRaw.value.length === 0) return;
   isSpinning.value = true;
