@@ -46,19 +46,34 @@
             placeholder="nama@dosen.ac.id"
           />
         </div>
+
         <div>
           <label
             class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1"
             >Kata Sandi</label
           >
-          <input
-            v-model="password"
-            type="password"
-            required
-            class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-base outline-none text-slate-900 dark:text-slate-100 placeholder:text-sm"
-            placeholder="••••••••"
-          />
+          <div class="relative">
+            <input
+              v-model="password"
+              :type="showPassword ? 'text' : 'password'"
+              required
+              class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl pl-3 pr-10 py-2 text-base outline-none text-slate-900 dark:text-slate-100 placeholder:text-sm"
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              @click="showPassword = !showPassword"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
+            >
+              <i
+                :class="
+                  showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'
+                "
+              ></i>
+            </button>
+          </div>
         </div>
+
         <button
           type="submit"
           :disabled="isSubmitting"
@@ -93,6 +108,7 @@
 </template>
 
 <script setup>
+import { ref, inject } from "vue";
 import { signInWithEmailAndPassword } from "firebase/auth";
 
 const { $auth } = useNuxtApp();
@@ -102,6 +118,9 @@ const email = ref("");
 const password = ref("");
 const errorMessage = ref("");
 const isSubmitting = ref(false);
+
+// State baru untuk kontrol visibility password
+const showPassword = ref(false);
 
 const handleLogin = async () => {
   isSubmitting.value = true;
