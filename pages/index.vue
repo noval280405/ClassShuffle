@@ -334,58 +334,88 @@
             </p>
           </div>
 
-          <div v-if="groups.length > 0 && !isSpinning" class="space-y-6">
+          <div v-if="groups.length > 0 && !isSpinning" class="space-y-4">
             <div
-              class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 flex justify-between items-center shadow-xl"
+              class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-3 shadow-md"
             >
-              <div>
-                <h2
-                  class="text-lg font-bold text-slate-950 dark:text-white flex items-center gap-2"
-                >
-                  <i class="fa-solid fa-champagne-glasses text-emerald-500"></i>
-                  Kelompok Terbentuk
-                </h2>
-              </div>
-              <button
-                @click="openShareModal"
-                class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-md transition flex items-center gap-1.5"
+              <span
+                class="text-xs font-semibold text-slate-500 dark:text-slate-400"
+                >Opsi Ekspor Hasil Kelompok:</span
               >
-                <i class="fa-solid fa-share-nodes"></i> Bagikan ke WA
-              </button>
+              <div class="flex flex-wrap gap-2 w-full sm:w-auto justify-end">
+                <button
+                  @click="downloadAsPDF"
+                  class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-md transition flex items-center gap-1.5"
+                >
+                  <i class="fa-solid fa-file-pdf"></i> PDF
+                </button>
+
+                <button
+                  @click="downloadAsImage"
+                  class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-md transition flex items-center gap-1.5"
+                >
+                  <i class="fa-solid fa-file-image"></i> Gambar (PNG)
+                </button>
+
+                <button
+                  @click="openShareModal"
+                  class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-md transition flex items-center gap-1.5"
+                >
+                  <i class="fa-solid fa-share-nodes"></i> Bagikan WA
+                </button>
+              </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div
+              id="grup-terbentuk-area"
+              class="p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl space-y-6"
+            >
               <div
-                v-for="(group, idx) in groups"
-                :key="idx"
-                class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-md hover:border-slate-400 transition flex flex-col justify-between"
+                class="border-b border-slate-200 dark:border-slate-700 pb-4 text-center sm:text-left"
               >
-                <div>
+                <h2
+                  class="text-3xl font-black tracking-tight text-slate-950 dark:text-white uppercase"
+                >
+                  DAFTAR KELOMPOK - KELAS {{ activeClass.name }}
+                </h2>
+                <p
+                  class="text-sm font-medium text-indigo-600 dark:text-indigo-400 mt-1"
+                >
+                  Aplikasi Kelompokin Cloud Platform
+                </p>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div
+                  v-for="(group, idx) in groups"
+                  :key="idx"
+                  class="bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm"
+                >
                   <div
-                    class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700 pb-3 mb-3"
+                    class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 pb-2 mb-2"
                   >
                     <h3
-                      class="font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 text-lg"
+                      class="font-extrabold text-base text-indigo-600 dark:text-indigo-400"
                     >
                       Kelompok {{ idx + 1 }}
                     </h3>
                     <span
-                      class="text-xs bg-slate-100 dark:bg-slate-900 px-2.5 py-1 rounded-full border text-slate-500"
+                      class="text-xs font-bold text-slate-400 bg-slate-200/50 dark:bg-slate-900 px-2 py-0.5 rounded-md"
                       >{{ group.length }} Anggota</span
                     >
                   </div>
-                  <ul class="space-y-2">
+                  <ul class="space-y-1.5">
                     <li
                       v-for="(studentName, sIdx) in group"
                       :key="studentName"
-                      class="group/item flex justify-between items-center text-sm bg-slate-50 dark:bg-slate-900/60 text-slate-700 dark:text-slate-300 px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700/50"
+                      class="text-xs font-medium flex justify-between items-center bg-white dark:bg-slate-800 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700"
                     >
-                      <span class="font-medium truncate max-w-[80%]">{{
+                      <span class="text-slate-800 dark:text-slate-200">{{
                         studentName
                       }}</span>
                       <button
                         @click="removeStudentFromGroup(idx, sIdx)"
-                        class="text-slate-400 hover:text-rose-500 transition p-0.5"
+                        class="text-slate-400 hover:text-rose-500 text-[10px] export-hide"
                       >
                         <i class="fa-solid fa-xmark"></i>
                       </button>
@@ -798,6 +828,98 @@ const openShareModal = () => {
   const origin = window.location.origin;
   generatedShareUrl.value = `${origin}?data=${base64Data}`;
   isModalOpen.value = true;
+};
+
+// Fungsi Helper Capture HTML murni area tabel & judul kelompok
+const captureElement = async () => {
+  if (!process.client) return null;
+
+  const element = document.getElementById("grup-terbentuk-area");
+  if (!element) {
+    alert("Elemen kelompok tidak ditemukan!");
+    return null;
+  }
+
+  const { default: html2canvas } = await import("html2canvas");
+
+  // Menyembunyikan tombol silang (x) kecil di samping nama siswa agar hasil gambar/PDF bersih
+  const hideElements = element.querySelectorAll(".export-hide");
+  hideElements.forEach((el) => (el.style.display = "none"));
+
+  try {
+    const canvas = await html2canvas(element, {
+      scale: 2, // Kualitas tajam HD
+      useCORS: true,
+      backgroundColor: isDarkMode.value ? "#0f172a" : "#ffffff",
+      logging: false,
+    });
+
+    // Kembalikan tombol silang setelah selesai difoto
+    hideElements.forEach((el) => (el.style.display = "block"));
+    return canvas;
+  } catch (err) {
+    console.error("Gagal menangkap layar HTML:", err);
+    hideElements.forEach((el) => (el.style.display = "block"));
+    return null;
+  }
+};
+// 1. FITUR UNDUH PDF (Aman untuk Nuxt 3)
+const downloadAsPDF = async () => {
+  if (!process.client) return;
+
+  const canvas = await captureElement();
+  if (!canvas) return;
+
+  const { jsPDF } = await import("jspdf");
+
+  try {
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "mm", "a4");
+    const imgWidth = 210; // Lebar A4 mm
+    const pageHeight = 295; // Tinggi A4 mm
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    while (heightLeft >= 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    pdf.save(`Hasil_Kelompok_${activeClassId.value || "Kelas"}.pdf`);
+  } catch (error) {
+    console.error("Gagal cetak PDF:", error);
+    alert("Gagal mengunduh PDF. Silakan coba lagi.");
+  }
+};
+
+// 2. FITUR UNDUH GAMBAR (PNG)
+const downloadAsImage = async () => {
+  if (!process.client) return;
+
+  const canvas = await captureElement();
+  if (!canvas) return;
+
+  try {
+    const imgData = canvas.toDataURL("image/png");
+
+    // Membuat elemen link download bayangan di DOM browser
+    const link = document.createElement("a");
+    link.href = imgData;
+    link.download = `Hasil_Kelompok_${activeClassId.value || "Kelas"}.png`;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link); // Hapus kembali setelah diunduh
+  } catch (error) {
+    console.error("Gagal mengunduh gambar:", error);
+    alert("Gagal mengunduh gambar. Silakan coba lagi.");
+  }
 };
 </script>
 
