@@ -344,6 +344,13 @@
               >
               <div class="flex flex-wrap gap-2 w-full sm:w-auto justify-end">
                 <button
+                  @click="resetGroups"
+                  class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-md transition flex items-center gap-1.5"
+                >
+                  <i class="fa-solid fa-arrow-rotate-left"></i> Reset Kelompok
+                </button>
+                
+                <button
                   @click="downloadAsPDF"
                   class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-md transition flex items-center gap-1.5"
                 >
@@ -820,6 +827,26 @@ const handleLogout = async () => {
   if (confirm("Apakah Anda ingin menutup sesi awan Kelompokin Anda?")) {
     await signOut($auth);
     navigateTo("/login");
+  }
+};
+
+// Fungsi untuk mereset/menghapus susunan kelompok yang sudah diacak
+const resetGroups = async () => {
+  if (!activeClass.value) return;
+
+  if (
+    confirm(
+      `Apakah Anda yakin ingin mereset dan menghapus semua susunan kelompok untuk kelas ${activeClass.value.name}?`,
+    )
+  ) {
+    try {
+      // Mengosongkan groups akan otomatis memicu fungsi setter computed
+      // untuk mengupdate Firestore menjadi "[]" secara otomatis
+      groups.value = [];
+    } catch (err) {
+      console.error("Gagal mereset kelompok:", err);
+      alert("Terjadi kesalahan saat mencoba mereset kelompok di cloud.");
+    }
   }
 };
 
