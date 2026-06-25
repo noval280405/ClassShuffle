@@ -357,12 +357,12 @@
                   <i class="fa-solid fa-file-image"></i> Gambar (PNG)
                 </button>
 
-                <button
+                <!-- <button
                   @click="openShareModal"
                   class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-md transition flex items-center gap-1.5"
                 >
                   <i class="fa-solid fa-share-nodes"></i> Bagikan WA
-                </button>
+                </button> -->
               </div>
             </div>
 
@@ -823,12 +823,12 @@ const handleLogout = async () => {
   }
 };
 
-const openShareModal = () => {
-  const base64Data = btoa(JSON.stringify(groups.value));
-  const origin = window.location.origin;
-  generatedShareUrl.value = `${origin}?data=${base64Data}`;
-  isModalOpen.value = true;
-};
+// const openShareModal = () => {
+//   const base64Data = btoa(JSON.stringify(groups.value));
+//   const origin = window.location.origin;
+//   generatedShareUrl.value = `${origin}?data=${base64Data}`;
+//   isModalOpen.value = true;
+// };
 
 // Fungsi Helper Capture HTML murni area tabel & judul kelompok
 const captureElement = async () => {
