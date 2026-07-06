@@ -334,100 +334,109 @@
             </p>
           </div>
 
-          <div v-if="groups.length > 0 && !isSpinning" class="space-y-4">
+          <div
+            v-if="groups.length > 0 && !isSpinning"
+            class="space-y-4 px-1 sm:px-0"
+          >
             <div
-              class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-3 shadow-md"
+              class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 flex flex-col md:flex-row justify-between items-center gap-4 shadow-md"
             >
               <span
-                class="text-xs font-semibold text-slate-500 dark:text-slate-400"
-                >Opsi Ekspor Hasil Kelompok:</span
+                class="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5 shrink-0 self-start md:self-center"
               >
-              <div class="flex flex-wrap gap-2 w-full sm:w-auto justify-end">
+                <i class="fa-solid fa-sliders text-indigo-500"></i> Opsi Ekspor
+                Hasil Kelompok:
+              </span>
+
+              <div
+                class="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 w-full md:w-auto justify-stretch sm:justify-end"
+              >
                 <button
                   @click="resetGroups"
-                  class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-md transition flex items-center gap-1.5"
+                  class="col-span-2 sm:col-span-1 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-sm transition flex items-center justify-center gap-1.5 order-last sm:order-none"
                 >
                   <i class="fa-solid fa-arrow-rotate-left"></i> Reset Kelompok
                 </button>
-                
+
                 <button
                   @click="downloadAsPDF"
-                  class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-md transition flex items-center gap-1.5"
+                  class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-sm transition flex items-center justify-center gap-1.5"
                 >
                   <i class="fa-solid fa-file-pdf"></i> PDF
                 </button>
 
                 <button
                   @click="downloadAsImage"
-                  class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-md transition flex items-center gap-1.5"
+                  class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-sm transition flex items-center justify-center gap-1.5"
                 >
                   <i class="fa-solid fa-file-image"></i> Gambar (PNG)
                 </button>
-
-                <!-- <button
-                  @click="openShareModal"
-                  class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-md transition flex items-center gap-1.5"
-                >
-                  <i class="fa-solid fa-share-nodes"></i> Bagikan WA
-                </button> -->
               </div>
             </div>
 
             <div
               id="grup-terbentuk-area"
-              class="p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl space-y-6"
+              class="p-4 sm:p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl space-y-6 overflow-hidden"
             >
               <div
                 class="border-b border-slate-200 dark:border-slate-700 pb-4 text-center sm:text-left"
               >
                 <h2
-                  class="text-3xl font-black tracking-tight text-slate-950 dark:text-white uppercase"
+                  class="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-slate-950 dark:text-white uppercase break-words"
                 >
                   DAFTAR KELOMPOK - KELAS {{ activeClass.name }}
                 </h2>
                 <p
-                  class="text-sm font-medium text-indigo-600 dark:text-indigo-400 mt-1"
+                  class="text-xs sm:text-sm font-medium text-indigo-600 dark:text-indigo-400 mt-1"
                 >
                   Aplikasi Kelompokin Cloud Platform
                 </p>
               </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div
                   v-for="(group, idx) in groups"
                   :key="idx"
-                  class="bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm"
+                  class="bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col justify-between"
                 >
-                  <div
-                    class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 pb-2 mb-2"
-                  >
-                    <h3
-                      class="font-extrabold text-base text-indigo-600 dark:text-indigo-400"
+                  <div>
+                    <div
+                      class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 pb-2 mb-3"
                     >
-                      Kelompok {{ idx + 1 }}
-                    </h3>
-                    <span
-                      class="text-xs font-bold text-slate-400 bg-slate-200/50 dark:bg-slate-900 px-2 py-0.5 rounded-md"
-                      >{{ group.length }} Anggota</span
-                    >
-                  </div>
-                  <ul class="space-y-1.5">
-                    <li
-                      v-for="(studentName, sIdx) in group"
-                      :key="studentName"
-                      class="text-xs font-medium flex justify-between items-center bg-white dark:bg-slate-800 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700"
-                    >
-                      <span class="text-slate-800 dark:text-slate-200">{{
-                        studentName
-                      }}</span>
-                      <button
-                        @click="removeStudentFromGroup(idx, sIdx)"
-                        class="text-slate-400 hover:text-rose-500 text-[10px] export-hide"
+                      <h3
+                        class="font-black text-sm sm:text-base text-indigo-600 dark:text-indigo-400"
                       >
-                        <i class="fa-solid fa-xmark"></i>
-                      </button>
-                    </li>
-                  </ul>
+                        Kelompok {{ idx + 1 }}
+                      </h3>
+                      <span
+                        class="text-[10px] sm:text-xs font-bold text-slate-400 bg-slate-200/50 dark:bg-slate-900/80 px-2 py-0.5 rounded-md shrink-0"
+                      >
+                        {{ group.length }} Anggota
+                      </span>
+                    </div>
+
+                    <ul class="space-y-2">
+                      <li
+                        v-for="(studentName, sIdx) in group"
+                        :key="studentName"
+                        class="text-xs font-medium flex justify-between items-center bg-white dark:bg-slate-800 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700 gap-2"
+                      >
+                        <span
+                          class="text-slate-800 dark:text-slate-200 truncate pr-1"
+                          :title="studentName"
+                        >
+                          {{ studentName }}
+                        </span>
+                        <button
+                          @click="removeStudentFromGroup(idx, sIdx)"
+                          class="text-slate-400 hover:text-rose-500 text-xs p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition shrink-0 export-hide"
+                          title="Hapus dari kelompok"
+                        >
+                          <i class="fa-solid fa-xmark"></i>
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
