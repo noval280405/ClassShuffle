@@ -81,9 +81,11 @@
               />
               <button
                 type="submit"
-                class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 rounded-xl text-sm font-bold transition flex items-center gap-1 shadow-md shrink-0"
+                :disabled="!newClassName.trim()"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 rounded-xl text-sm font-bold shadow-md shadow-indigo-500/10 active:scale-95 hover:scale-105 disabled:scale-100 disabled:bg-slate-200 dark:disabled:bg-slate-700/60 disabled:text-slate-400 dark:disabled:text-slate-500 disabled:cursor-not-allowed disabled:shadow-none shrink-0 transition-all duration-200 flex items-center gap-1"
               >
-                <i class="fa-solid fa-plus"></i> Tambah
+                <i class="fa-solid fa-plus text-xs"></i>
+                <span>Tambah</span>
               </button>
             </div>
           </form>
@@ -97,21 +99,27 @@
               <div
                 v-for="cls in classes"
                 :key="cls.id"
-                class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border transition cursor-pointer"
+                class="flex items-center justify-between gap-4 px-3 py-2 rounded-xl text-sm font-semibold border transition cursor-pointer select-none group/class min-w-[100px]"
                 :class="
                   activeClassId === cls.id
                     ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/20'
-                    : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-200'
+                    : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-800'
                 "
                 @click="selectClass(cls.id)"
               >
-                <span>{{ cls.name }}</span>
+                <span class="truncate pr-1">{{ cls.name }}</span>
+
                 <button
                   @click.stop="removeClass(cls.id, cls.name)"
-                  class="text-slate-400 hover:text-rose-400 transition ml-1"
+                  class="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-slate-200/60 dark:hover:bg-slate-800/80 transition-all shrink-0"
+                  :class="
+                    activeClassId === cls.id
+                      ? 'text-indigo-200 hover:text-rose-200 hover:bg-indigo-700'
+                      : ''
+                  "
                   title="Hapus kelas"
                 >
-                  <i class="fa-solid fa-xmark text-xs"></i>
+                  <i class="fa-regular fa-trash-can text-xs block"></i>
                 </button>
               </div>
               <p
@@ -151,7 +159,8 @@
               />
               <button
                 type="submit"
-                class="bg-purple-600 hover:bg-purple-700 text-white px-4 rounded-xl text-sm font-bold transition flex items-center justify-center shadow-md shrink-0 w-11"
+                :disabled="!newStudentName.trim()"
+                class="bg-purple-600 hover:bg-purple-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 disabled:text-slate-400 disabled:cursor-not-allowed text-white px-4 rounded-xl text-sm font-bold transition flex items-center justify-center shadow-md shrink-0 w-11"
               >
                 <i class="fa-solid fa-user-plus"></i>
               </button>
