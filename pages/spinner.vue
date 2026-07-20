@@ -22,10 +22,19 @@ import {
   CheckCircle2,
   Loader2,
   Users,
+  Sun,
+  Moon,
 } from "lucide-vue-next";
 
 // Mengambil plugin Firebase dari Nuxt App
 const { $auth, $db } = useNuxtApp();
+
+// State Theme (Dark / Light)
+const isDarkMode = ref(true);
+const toggleTheme = () => {
+  isDarkMode.value = !isDarkMode.value;
+  drawWheel(); // Redraw canvas untuk sesuaikan warna background canvas jika kosong
+};
 
 // State Otentikasi & Firebase Data
 const currentUser = ref(null);
@@ -43,7 +52,7 @@ const pemenangSaatIni = ref("");
 const isSpinning = ref(false);
 const canvasRef = ref(null);
 
-// Palette Warna Roda Spinner Elegant & Kontras
+// Palette Warna Roda Spinner
 const spinnerColors = [
   "#6366F1",
   "#3B82F6",
@@ -254,15 +263,15 @@ const drawWheel = () => {
   ctx.clearRect(0, 0, 300, 300);
 
   if (list.length === 0) {
-    ctx.fillStyle = "#1e293b";
+    ctx.fillStyle = isDarkMode.value ? "#1e293b" : "#f1f5f9";
     ctx.beginPath();
     ctx.arc(150, 150, 140, 0, 2 * Math.PI);
     ctx.fill();
-    ctx.strokeStyle = "#334155";
+    ctx.strokeStyle = isDarkMode.value ? "#334155" : "#cbd5e1";
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    ctx.fillStyle = "#94a3b8";
+    ctx.fillStyle = isDarkMode.value ? "#94a3b8" : "#64748b";
     ctx.font = "500 12px sans-serif";
     ctx.textAlign = "center";
     ctx.fillText(
@@ -309,7 +318,7 @@ const drawWheel = () => {
   // Pin Lingkaran Tengah
   ctx.beginPath();
   ctx.arc(150, 150, 22, 0, 2 * Math.PI, false);
-  ctx.fillStyle = "#0f172a";
+  ctx.fillStyle = isDarkMode.value ? "#0f172a" : "#ffffff";
   ctx.fill();
   ctx.lineWidth = 3;
   ctx.strokeStyle = "#6366f1";
@@ -381,58 +390,86 @@ const resetAll = () => {
 
 <template>
   <div
-    class="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 flex flex-col justify-center items-center font-sans"
+    class="min-h-screen p-4 md:p-8 flex flex-col justify-center items-center font-sans transition-colors duration-300"
+    :class="
+      isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-100 text-slate-800'
+    "
   >
     <div
-      class="w-full max-w-7xl bg-slate-900/80 backdrop-blur-xl border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl"
+      class="w-full max-w-7xl backdrop-blur-xl border rounded-3xl p-6 md:p-8 shadow-2xl transition-colors duration-300"
+      :class="
+        isDarkMode
+          ? 'bg-slate-900/80 border-slate-800'
+          : 'bg-white/90 border-slate-200'
+      "
     >
       <!-- Header -->
-      <div
-        class="border-b border-slate-800 pb-5 mb-6 text-center lg:text-left flex flex-col lg:flex-row lg:items-center justify-between gap-4"
-      >
-        <div>
-          <h1
-            class="text-2xl md:text-3xl font-extrabold tracking-tight text-white flex items-center justify-center lg:justify-start gap-3"
-          >
-            <div
-              class="p-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-400"
-            >
-              <Disc class="w-6 h-6 animate-spin-slow" />
-            </div>
-            Random Spinner System
-          </h1>
-          <p
-            class="text-xs text-slate-400 mt-1 flex items-center justify-center lg:justify-start gap-2"
-          >
-            <span
-              class="inline-flex items-center gap-1.5 text-emerald-400 font-medium"
-            >
-              <span
-                class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
-              ></span>
-              Tersinkronisasi
-            </span>
-            <span class="text-slate-600">:</span>
-            <span
-              ><strong class="text-slate-300">{{
-                currentUser?.email || "Aktif"
-              }}</strong></span
-            >
-          </p>
-        </div>
+     <div 
+  class="border-b pb-5 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors duration-300"
+  :class="isDarkMode ? 'border-slate-800' : 'border-slate-200'"
+>
+  <!-- Sisi Kiri: Judul & Status -->
+  <div class="flex flex-col items-center sm:items-start text-center sm:text-left">
+    <h1 
+      class="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight flex items-center justify-center sm:justify-start gap-2.5 sm:gap-3 transition-colors duration-300"
+      :class="isDarkMode ? 'text-white' : 'text-slate-900'"
+    >
+      <div class="p-1.5 sm:p-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-500 shrink-0">
+        <Disc class="w-5 h-5 sm:w-6 sm:h-6 animate-spin-slow" />
       </div>
+      <span class="truncate">Random Spinner System</span>
+    </h1>
+    
+    <p 
+      class="text-[11px] sm:text-xs mt-1.5 flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2 transition-colors duration-300"
+      :class="isDarkMode ? 'text-slate-400' : 'text-slate-500'"
+    >
+      <span class="inline-flex items-center gap-1.5 text-emerald-500 font-medium shrink-0">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        Tersinkronisasi
+      </span>
+      <span :class="isDarkMode ? 'text-slate-600' : 'text-slate-300'">:</span>
+      <span class="truncate max-w-[200px] sm:max-w-none">
+        <strong :class="isDarkMode ? 'text-slate-300' : 'text-slate-700'">
+          {{ currentUser?.email || 'Aktif' }}
+        </strong>
+      </span>
+    </p>
+  </div>
+
+  <!-- Sisi Kanan: Tombol Toggle Dark/Light Mode -->
+  <button
+    @click="toggleTheme"
+    class="w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 transition-all duration-300 shadow-sm shrink-0 active:scale-95"
+    :class="isDarkMode 
+      ? 'bg-slate-800 border-slate-700 text-amber-400 hover:bg-slate-700' 
+      : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'"
+  >
+    <Sun v-if="isDarkMode" class="w-4 h-4" />
+    <Moon v-else class="w-4 h-4 text-indigo-600" />
+    <span>{{ isDarkMode ? 'Light Mode' : 'Dark Mode' }}</span>
+  </button>
+</div>
 
       <!-- Grid 3 Kolom Desktop -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <!-- KOLOM 1: MANAJEMEN KELAS & SISWA -->
         <div
-          class="bg-slate-950/40 p-5 rounded-2xl border border-slate-800/80 h-full flex flex-col justify-between"
+          class="p-5 rounded-2xl border h-full flex flex-col justify-between transition-colors duration-300"
+          :class="
+            isDarkMode
+              ? 'bg-slate-950/40 border-slate-800/80'
+              : 'bg-slate-50 border-slate-200'
+          "
         >
           <div>
             <!-- Section Pilih Kelas -->
-            <div class="mb-5 pb-5 border-b border-slate-800">
+            <div
+              class="mb-5 pb-5 border-b transition-colors duration-300"
+              :class="isDarkMode ? 'border-slate-800' : 'border-slate-200'"
+            >
               <label
-                class="font-semibold text-xs text-indigo-400 tracking-wider uppercase flex items-center gap-2 mb-2.5"
+                class="font-semibold text-xs text-indigo-500 tracking-wider uppercase flex items-center gap-2 mb-2.5"
               >
                 <School class="w-4 h-4" /> Pilih Kelas
               </label>
@@ -442,7 +479,12 @@ const resetAll = () => {
                   :value="activeClassId"
                   @change="selectClass($event.target.value)"
                   :disabled="isSpinning || classes.length === 0"
-                  class="flex-1 p-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm font-semibold text-slate-200 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none transition-all"
+                  class="flex-1 p-2.5 border rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500/50 focus:outline-none transition-all"
+                  :class="
+                    isDarkMode
+                      ? 'bg-slate-900 border-slate-700/80 text-slate-200'
+                      : 'bg-white border-slate-300 text-slate-800'
+                  "
                 >
                   <option v-if="classes.length === 0" value="">
                     Belum ada kelas
@@ -456,8 +498,8 @@ const resetAll = () => {
                   v-if="activeClassId"
                   @click="removeClass(activeClassId)"
                   :disabled="isSpinning"
-                  title="Hapus Kelas Dari Cloud"
-                  class="p-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 rounded-xl transition-all"
+                  title="Hapus Kelas"
+                  class="p-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/20 rounded-xl transition-all"
                 >
                   <Trash2 class="w-4 h-4" />
                 </button>
@@ -469,12 +511,22 @@ const resetAll = () => {
                   type="text"
                   v-model="newClassName"
                   placeholder="Nama kelas baru..."
-                  class="flex-1 px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  class="flex-1 px-3 py-2 border rounded-lg text-xs placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all"
+                  :class="
+                    isDarkMode
+                      ? 'bg-slate-900 border-slate-800 text-slate-200'
+                      : 'bg-white border-slate-300 text-slate-800'
+                  "
                   @keyup.enter="addClass"
                 />
                 <button
                   @click="addClass"
-                  class="px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs rounded-lg transition-all flex items-center gap-1"
+                  class="px-3 py-2 border font-semibold text-xs rounded-lg transition-all flex items-center gap-1"
+                  :class="
+                    isDarkMode
+                      ? 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
+                      : 'bg-slate-200 hover:bg-slate-300 border-slate-300 text-slate-800'
+                  "
                 >
                   <Plus class="w-3.5 h-3.5" /> Buat
                 </button>
@@ -484,14 +536,20 @@ const resetAll = () => {
             <!-- Section Input Nama Siswa -->
             <div class="flex items-center justify-between mb-2.5">
               <label
-                class="font-semibold text-xs text-indigo-400 tracking-wider uppercase flex items-center gap-2"
+                class="font-semibold text-xs text-indigo-500 tracking-wider uppercase flex items-center gap-2"
               >
                 <FileText class="w-4 h-4" /> Daftar Siswa
               </label>
               <span
-                class="text-[10px] bg-slate-900 text-slate-400 px-2 py-0.5 rounded border border-slate-800"
-                >1 Nama / Baris</span
+                class="text-[10px] px-2 py-0.5 rounded border transition-colors duration-300"
+                :class="
+                  isDarkMode
+                    ? 'bg-slate-900 text-slate-400 border-slate-800'
+                    : 'bg-slate-200 text-slate-600 border-slate-300'
+                "
               >
+                1 Nama / Baris
+              </span>
             </div>
 
             <textarea
@@ -499,7 +557,12 @@ const resetAll = () => {
               :disabled="isSpinning || !activeClassId"
               rows="7"
               placeholder="Masukkan nama siswa..."
-              class="w-full p-3.5 bg-slate-900 border border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-slate-200 font-mono placeholder-slate-600 resize-none transition-all"
+              class="w-full p-3.5 border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/50 font-mono placeholder-slate-400 resize-none transition-all"
+              :class="
+                isDarkMode
+                  ? 'bg-slate-900 border-slate-800 text-slate-200'
+                  : 'bg-white border-slate-300 text-slate-800'
+              "
             ></textarea>
           </div>
 
@@ -515,7 +578,12 @@ const resetAll = () => {
             <button
               @click="resetAll"
               :disabled="isSpinning || !activeClassId"
-              class="w-full py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-200 font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-2"
+              class="w-full py-2 border font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-2"
+              :class="
+                isDarkMode
+                  ? 'bg-slate-900 hover:bg-slate-800 border-slate-800 text-slate-400 hover:text-slate-200'
+                  : 'bg-white hover:bg-slate-100 border-slate-300 text-slate-600 hover:text-slate-900'
+              "
             >
               <RotateCcw class="w-3.5 h-3.5" /> Reset Urutan
             </button>
@@ -524,14 +592,24 @@ const resetAll = () => {
 
         <!-- KOLOM 2: SPINNER CANVAS -->
         <div
-          class="flex flex-col items-center justify-center bg-slate-950/40 p-6 rounded-2xl border border-slate-800 h-full min-h-[440px]"
+          class="flex flex-col items-center justify-center p-6 rounded-2xl border h-full min-h-[440px] transition-colors duration-300"
+          :class="
+            isDarkMode
+              ? 'bg-slate-950/40 border-slate-800'
+              : 'bg-slate-50 border-slate-200'
+          "
         >
           <div
-            class="relative w-[310px] h-[310px] flex items-center justify-center p-2 rounded-full border border-slate-800 bg-slate-900 shadow-2xl"
+            class="relative w-[310px] h-[310px] flex items-center justify-center p-2 rounded-full border shadow-2xl transition-colors duration-300"
+            :class="
+              isDarkMode
+                ? 'border-slate-800 bg-slate-900'
+                : 'border-slate-200 bg-white'
+            "
           >
             <!-- Jarum Penunjuk Fisik -->
             <div
-              class="absolute -top-2 left-1/2 -translate-x-1/2 z-20 w-0 h-0 border-l-[14px] border-l-transparent border-r-[14px] border-r-transparent border-t-[28px] border-t-rose-500 filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.5)]"
+              class="absolute -top-2 left-1/2 -translate-x-1/2 z-20 w-0 h-0 border-l-[14px] border-l-transparent border-r-[14px] border-r-transparent border-t-[28px] border-t-rose-500 filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.3)]"
             ></div>
 
             <canvas
@@ -545,7 +623,7 @@ const resetAll = () => {
           <button
             @click="spinTheWheel"
             :disabled="isSpinning || studentsListRaw.length === 0"
-            class="mt-6 w-full max-w-[280px] py-3.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:opacity-50 text-white font-bold text-xs tracking-wider rounded-xl shadow-lg shadow-indigo-600/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+            class="mt-6 w-full max-w-[280px] py-3.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-300 disabled:dark:bg-slate-800 disabled:opacity-50 text-white font-bold text-xs tracking-wider rounded-xl shadow-lg shadow-indigo-600/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
           >
             <Loader2 v-if="isSpinning" class="w-4 h-4 animate-spin" />
             <Sparkles v-else class="w-4 h-4" />
@@ -554,7 +632,7 @@ const resetAll = () => {
 
           <div
             v-if="pemenangSaatIni"
-            class="mt-4 p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold rounded-xl text-center w-full max-w-[280px] text-xs tracking-wide flex items-center justify-center gap-2"
+            class="mt-4 p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 font-bold rounded-xl text-center w-full max-w-[280px] text-xs tracking-wide flex items-center justify-center gap-2"
           >
             <CheckCircle2 class="w-4 h-4" /> Terpilih: {{ pemenangSaatIni }}
           </div>
@@ -562,17 +640,22 @@ const resetAll = () => {
 
         <!-- KOLOM 3: HASIL URUTAN -->
         <div
-          class="bg-slate-950/40 p-5 rounded-2xl border border-slate-800 h-full flex flex-col justify-between min-h-[440px]"
+          class="p-5 rounded-2xl border h-full flex flex-col justify-between min-h-[440px] transition-colors duration-300"
+          :class="
+            isDarkMode
+              ? 'bg-slate-950/40 border-slate-800'
+              : 'bg-slate-50 border-slate-200'
+          "
         >
           <div class="w-full">
             <h3
-              class="font-semibold text-xs text-indigo-400 tracking-wider uppercase mb-4 flex items-center justify-between"
+              class="font-semibold text-xs text-indigo-500 tracking-wider uppercase mb-4 flex items-center justify-between"
             >
               <span class="flex items-center gap-2">
                 <ClipboardList class="w-4 h-4" /> Hasil Giliran
               </span>
               <span
-                class="text-[10px] bg-indigo-500/10 text-indigo-400 px-2.5 py-0.5 rounded-full font-bold border border-indigo-500/20"
+                class="text-[10px] bg-indigo-500/10 text-indigo-500 px-2.5 py-0.5 rounded-full font-bold border border-indigo-500/20"
               >
                 {{ urutanHafalan.length }} Terpilih
               </span>
@@ -580,36 +663,53 @@ const resetAll = () => {
 
             <div
               v-if="urutanHafalan.length === 0"
-              class="border border-dashed border-slate-800 p-8 rounded-xl text-center text-xs text-slate-500"
+              class="border border-dashed p-8 rounded-xl text-center text-xs transition-colors duration-300"
+              :class="
+                isDarkMode
+                  ? 'border-slate-800 text-slate-500'
+                  : 'border-slate-300 text-slate-400'
+              "
             >
               Belum ada antrean. Klik
-              <strong class="text-slate-300">Putar Roda</strong> untuk mengundi.
+              <strong :class="isDarkMode ? 'text-slate-300' : 'text-slate-700'"
+                >Putar Roda</strong
+              >
+              untuk mengundi.
             </div>
 
             <div v-else class="space-y-2 max-h-[300px] overflow-y-auto pr-1">
               <div
                 v-for="(name, index) in urutanHafalan"
                 :key="index"
-                class="flex items-center gap-3 p-3 rounded-xl border border-slate-800 bg-slate-900/60 transition-all hover:border-slate-700"
+                class="flex items-center gap-3 p-3 rounded-xl border transition-all"
+                :class="
+                  isDarkMode
+                    ? 'border-slate-800 bg-slate-900/60 hover:border-slate-700'
+                    : 'border-slate-200 bg-white hover:border-slate-300'
+                "
               >
                 <span
                   class="w-6 h-6 flex items-center justify-center rounded-lg font-bold text-xs"
                   :class="
                     index === 0
-                      ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                      : 'bg-slate-800 text-slate-400'
+                      ? 'bg-amber-500/20 text-amber-500 border border-amber-500/30'
+                      : isDarkMode
+                        ? 'bg-slate-800 text-slate-400'
+                        : 'bg-slate-100 text-slate-600'
                   "
                 >
                   {{ index + 1 }}
                 </span>
 
-                <span class="font-medium text-xs text-slate-200 truncate">{{
-                  name
-                }}</span>
+                <span
+                  class="font-medium text-xs truncate"
+                  :class="isDarkMode ? 'text-slate-200' : 'text-slate-800'"
+                  >{{ name }}</span
+                >
 
                 <span
                   v-if="index === 0"
-                  class="text-[9px] px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded font-semibold ml-auto uppercase tracking-wider"
+                  class="text-[9px] px-2 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded font-semibold ml-auto uppercase tracking-wider"
                 >
                   Maju Utama
                 </span>
@@ -618,17 +718,23 @@ const resetAll = () => {
           </div>
 
           <div
-            class="mt-4 p-3 bg-slate-900/80 rounded-xl text-[11px] flex justify-between items-center text-slate-400 border border-slate-800"
+            class="mt-4 p-3 rounded-xl text-[11px] flex justify-between items-center border transition-colors duration-300"
+            :class="
+              isDarkMode
+                ? 'bg-slate-900/80 text-slate-400 border-slate-800'
+                : 'bg-white text-slate-600 border-slate-200'
+            "
           >
             <span class="flex items-center gap-1.5">
-              <Users class="w-3.5 h-3.5 text-slate-500" /> Sisa di roda:
-              <strong class="text-slate-200 font-semibold">{{
-                studentsListRaw.length
-              }}</strong>
+              <Users class="w-3.5 h-3.5 text-slate-400" /> Sisa di roda:
+              <strong
+                :class="isDarkMode ? 'text-slate-200' : 'text-slate-800'"
+                >{{ studentsListRaw.length }}</strong
+              >
             </span>
             <span
               v-if="studentsListRaw.length === 0 && urutanHafalan.length > 0"
-              class="text-emerald-400 font-bold text-[10px] tracking-wide uppercase"
+              class="text-emerald-500 font-bold text-[10px] tracking-wide uppercase"
             >
               Selesai All
             </span>
