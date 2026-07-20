@@ -8,6 +8,22 @@ import {
   deleteDoc
 } from "firebase/firestore";
 
+// Import Ikon Lucide untuk tampilan premium
+import {
+  Disc,
+  School,
+  Trash2,
+  Plus,
+  FileText,
+  CloudUpload,
+  RotateCcw,
+  Sparkles,
+  ClipboardList,
+  CheckCircle2,
+  Loader2,
+  Users
+} from "lucide-vue-next";
+
 // Mengambil plugin Firebase dari Nuxt App
 const { $auth, $db } = useNuxtApp();
 
@@ -19,7 +35,6 @@ const studentsListRaw = ref([]);
 
 // State Form & Input
 const newClassName = ref("");
-const newStudentName = ref("");
 const namesInput = ref("");
 
 // State Roda Spinner & Urutan Giliran
@@ -28,11 +43,11 @@ const pemenangSaatIni = ref("");
 const isSpinning = ref(false);
 const canvasRef = ref(null);
 
-// Palette Warna Roda Spinner Ceria & Kontras
+// Palette Warna Roda Spinner Elegant & Kontras
 const spinnerColors = [
-  "#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A", 
-  "#98D8C8", "#F7DC6F", "#BB8FCE", "#85C1E9", 
-  "#7DCEA0", "#F1948A"
+  "#6366F1", "#3B82F6", "#0EA5E9", "#10B981", 
+  "#8B5CF6", "#EC4899", "#F59E0B", "#14B8A6", 
+  "#64748B", "#F43F5E"
 ];
 
 // Kontrol Animasi Canvas
@@ -64,7 +79,6 @@ onMounted(() => {
 // 1. INTEGRASI FIRESTORE (DAFTAR KELAS & SISWA)
 // ==========================================
 
-// Ambil daftar kelas dari Firestore
 const fetchClassesFromCloud = async (uid) => {
   try {
     const classesCollRef = collection($db, "users_data", uid, "classes");
@@ -84,7 +98,6 @@ const fetchClassesFromCloud = async (uid) => {
   }
 };
 
-// Ambil daftar siswa berdasarkan kelas yang dipilih
 const selectClass = async (classId) => {
   if (isSpinning.value) return;
   activeClassId.value = classId;
@@ -119,7 +132,6 @@ const selectClass = async (classId) => {
   }
 };
 
-// Tambah Kelas Baru ke Firestore
 const addClass = async () => {
   const name = newClassName.value.trim();
   if (!name || !currentUser.value) return;
@@ -141,7 +153,6 @@ const addClass = async () => {
   }
 };
 
-// Hapus Kelas dari Firestore
 const removeClass = async (id) => {
   if (confirm(`Hapus permanen seluruh data kelas ${id} dari cloud?`)) {
     try {
@@ -163,7 +174,6 @@ const removeClass = async (id) => {
   }
 };
 
-// Simpan/Perbarui Daftar Nama Siswa Massal dari Textarea ke Firestore
 const syncStudentsFromTextarea = async () => {
   if (!activeClassId.value || !currentUser.value || isSpinning.value) return;
 
@@ -180,12 +190,10 @@ const syncStudentsFromTextarea = async () => {
       "nama_siswa"
     );
 
-    // 1. Hapus data siswa lama di Firestore agar tersinkronisasi sempurna
     const currentDocs = await getDocs(studentsCollRef);
     const deletePromises = currentDocs.docs.map((d) => deleteDoc(d.ref));
     await Promise.all(deletePromises);
 
-    // 2. Simpan daftar nama siswa yang baru ke Firestore
     const newStudentsList = [];
     for (const name of validNames) {
       const studentId = generateSlug(name);
@@ -226,15 +234,19 @@ const drawWheel = () => {
   ctx.clearRect(0, 0, 300, 300);
 
   if (list.length === 0) {
-    ctx.fillStyle = "#e2e8f0";
+    ctx.fillStyle = "#1e293b";
     ctx.beginPath();
     ctx.arc(150, 150, 140, 0, 2 * Math.PI);
     ctx.fill();
-    ctx.fillStyle = "#64748b";
-    ctx.font = "bold 13px sans-serif";
+    ctx.strokeStyle = "#334155";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "500 12px sans-serif";
     ctx.textAlign = "center";
     ctx.fillText(
-      urutanHafalan.value.length > 0 ? "Semua siswa selesai diacak!" : "Tidak ada data siswa",
+      urutanHafalan.value.length > 0 ? "Semua siswa selesai diacak" : "Tidak ada data siswa",
       150,
       155
     );
@@ -255,21 +267,21 @@ const drawWheel = () => {
     ctx.save();
     ctx.fillStyle = "#FFFFFF";
     ctx.shadowBlur = 4;
-    ctx.shadowColor = "rgba(0,0,0,0.4)";
+    ctx.shadowColor = "rgba(0,0,0,0.3)";
     ctx.translate(150 + Math.cos(angle + arc / 2) * 85, 150 + Math.sin(angle + arc / 2) * 85);
     ctx.rotate(angle + arc / 2 + Math.PI / 2);
     
-    ctx.font = "bold 11px sans-serif";
+    ctx.font = "600 11px sans-serif";
     ctx.textAlign = "center";
     const displayName = student.name.length > 10 ? student.name.substring(0, 8) + ".." : student.name;
     ctx.fillText(displayName, 0, 0);
     ctx.restore();
   });
 
-  // Center Pin
+  // Pin Lingkaran Tengah
   ctx.beginPath();
   ctx.arc(150, 150, 22, 0, 2 * Math.PI, false);
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = "#0f172a";
   ctx.fill();
   ctx.lineWidth = 3;
   ctx.strokeStyle = "#6366f1";
@@ -337,29 +349,37 @@ const resetAll = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-900 text-white p-4 md:p-8 flex flex-col justify-center items-center font-sans">
-    <div class="w-full max-w-7xl bg-slate-800 border border-slate-700 rounded-3xl p-6 md:p-8 shadow-2xl">
+  <div class="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 flex flex-col justify-center items-center font-sans">
+    <div class="w-full max-w-7xl bg-slate-900/80 backdrop-blur-xl border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl">
       
-      <!-- Judul Aplikasi -->
-      <div class="border-b border-slate-700 pb-4 mb-6 text-center lg:text-left">
-        <h1 class="text-2xl md:text-3xl font-black tracking-tight text-indigo-400 flex items-center justify-center lg:justify-start gap-2">
-          🎡 Master Spinner Hafalan (Cloud Connected)
-        </h1>
-        <p class="text-sm text-slate-400 mt-1">
-          Terhubung langsung ke Firestore: <code class="text-xs bg-slate-900 px-2 py-0.5 rounded text-indigo-300">users_data/{uid}/classes/{classId}/nama_siswa</code>
-        </p>
+      <!-- Header -->
+      <div class="border-b border-slate-800 pb-5 mb-6 text-center lg:text-left flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white flex items-center justify-center lg:justify-start gap-3">
+            <div class="p-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-400">
+              <Disc class="w-6 h-6 animate-spin-slow" />
+            </div>
+            Random Spinner System
+          </h1>
+          <p class="text-xs text-slate-400 mt-1 flex items-center justify-center lg:justify-start gap-2">
+            <span>Terhubung ke Cloud Firestore:</span>
+            <code class="text-[11px] bg-slate-950 px-2.5 py-0.5 rounded-md border border-slate-800 text-indigo-300 font-mono">
+              users_data/{uid}/classes/{classId}/nama_siswa
+            </code>
+          </p>
+        </div>
       </div>
 
-      <!-- GRID RESPONSUS DESKTOP (3 KOLOM) -->
+      <!-- Grid 3 Kolom Desktop -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         
         <!-- KOLOM 1: MANAJEMEN KELAS & SISWA -->
-        <div class="bg-slate-900/50 p-5 rounded-2xl border border-slate-700/60 h-full flex flex-col justify-between">
+        <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-800/80 h-full flex flex-col justify-between">
           <div>
-            <!-- Section Pilih & Hapus Kelas -->
-            <div class="mb-5 pb-4 border-b border-slate-700/80">
-              <label class="font-bold text-xs text-indigo-300 tracking-wide uppercase block mb-2">
-                🏫 Pilih Kelas (Cloud)
+            <!-- Section Pilih Kelas -->
+            <div class="mb-5 pb-5 border-b border-slate-800">
+              <label class="font-semibold text-xs text-indigo-400 tracking-wider uppercase flex items-center gap-2 mb-2.5">
+                <School class="w-4 h-4" /> Pilih Kelas
               </label>
               
               <div class="flex gap-2 mb-3">
@@ -367,7 +387,7 @@ const resetAll = () => {
                   :value="activeClassId" 
                   @change="selectClass($event.target.value)"
                   :disabled="isSpinning || classes.length === 0"
-                  class="flex-1 p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm font-bold text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  class="flex-1 p-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm font-semibold text-slate-200 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none transition-all"
                 >
                   <option v-if="classes.length === 0" value="">Belum ada kelas</option>
                   <option v-for="cls in classes" :key="cls.id" :value="cls.id">
@@ -380,133 +400,139 @@ const resetAll = () => {
                   @click="removeClass(activeClassId)" 
                   :disabled="isSpinning" 
                   title="Hapus Kelas Dari Cloud"
-                  class="px-3 bg-rose-950/50 hover:bg-rose-900 text-rose-400 border border-rose-800/80 rounded-xl font-bold text-xs"
+                  class="p-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 rounded-xl transition-all"
                 >
-                  🗑️
+                  <Trash2 class="w-4 h-4" />
                 </button>
               </div>
 
-              <!-- Form Tambah Kelas Baru -->
+              <!-- Input Tambah Kelas Baru -->
               <div class="flex gap-2">
                 <input 
                   type="text" 
                   v-model="newClassName" 
-                  placeholder="+ Tambah kelas baru..." 
-                  class="flex-1 px-3 py-1.5 bg-slate-800/80 border border-slate-700 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  placeholder="Nama kelas baru..." 
+                  class="flex-1 px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                   @keyup.enter="addClass"
                 />
                 <button 
                   @click="addClass" 
-                  class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-lg transition-all"
+                  class="px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs rounded-lg transition-all flex items-center gap-1"
                 >
-                  Buat
+                  <Plus class="w-3.5 h-3.5" /> Buat
                 </button>
               </div>
             </div>
 
-            <!-- Section Textarea Input Siswa -->
-            <div class="flex items-center justify-between mb-2">
-              <label class="font-bold text-xs text-indigo-300 tracking-wide uppercase">
-                📝 Daftar Siswa ({{ activeClassId || 'Kosong' }})
+            <!-- Section Input Nama Siswa -->
+            <div class="flex items-center justify-between mb-2.5">
+              <label class="font-semibold text-xs text-indigo-400 tracking-wider uppercase flex items-center gap-2">
+                <FileText class="w-4 h-4" /> Daftar Siswa
               </label>
-              <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-700">1 Nama = 1 Baris</span>
+              <span class="text-[10px] bg-slate-900 text-slate-400 px-2 py-0.5 rounded border border-slate-800">1 Nama / Baris</span>
             </div>
             
             <textarea 
               v-model="namesInput" 
               :disabled="isSpinning || !activeClassId"
               rows="7" 
-              placeholder="Paste nama murid disini..."
-              class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white font-mono placeholder-slate-500 resize-none transition-all duration-200"
+              placeholder="Masukkan nama siswa..."
+              class="w-full p-3.5 bg-slate-900 border border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-slate-200 font-mono placeholder-slate-600 resize-none transition-all"
             ></textarea>
           </div>
 
-          <div class="mt-4 flex flex-col gap-2">
+          <!-- Tombol Aksi -->
+          <div class="mt-5 flex flex-col gap-2">
             <button 
               @click="syncStudentsFromTextarea" 
               :disabled="isSpinning || !activeClassId"
-              class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs rounded-xl transition-all shadow"
+              class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold text-xs rounded-xl transition-all shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2"
             >
-              ☁️ SIMPAN SISWA KE CLOUD
+              <CloudUpload class="w-4 h-4" /> Simpan Ke Cloud
             </button>
             <button 
               @click="resetAll" 
               :disabled="isSpinning || !activeClassId"
-              class="w-full py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 font-bold text-xs rounded-xl transition-all"
+              class="w-full py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-200 font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-2"
             >
-              🔄 RESET URUTAN SPINNER
+              <RotateCcw class="w-3.5 h-3.5" /> Reset Urutan
             </button>
           </div>
         </div>
 
-        <!-- KOLOM 2: MESIN SPINNER CANVAS -->
-        <div class="flex flex-col items-center justify-center bg-slate-900/30 p-5 rounded-2xl border border-dashed border-slate-700 h-full min-h-[420px]">
-          <div class="relative w-[310px] h-[310px] flex items-center justify-center p-2 rounded-full border border-indigo-500/20 bg-slate-900 shadow-inner">
+        <!-- KOLOM 2: SPINNER CANVAS -->
+        <div class="flex flex-col items-center justify-center bg-slate-950/40 p-6 rounded-2xl border border-slate-800 h-full min-h-[440px]">
+          <div class="relative w-[310px] h-[310px] flex items-center justify-center p-2 rounded-full border border-slate-800 bg-slate-900 shadow-2xl">
             
-            <!-- Jarum Penunjuk Fisik di Jam 12 -->
+            <!-- Jarum Penunjuk Fisik -->
             <div class="absolute -top-2 left-1/2 -translate-x-1/2 z-20 w-0 h-0 
-                        border-l-[15px] border-l-transparent 
-                        border-r-[15px] border-r-transparent 
-                        border-t-[30px] border-t-red-500 filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.6)] animate-bounce">
+                        border-l-[14px] border-l-transparent 
+                        border-r-[14px] border-r-transparent 
+                        border-t-[28px] border-t-rose-500 filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.5)]">
             </div>
             
-            <canvas ref="canvasRef" width="300" height="300" class="rounded-full shadow-2xl bg-transparent"></canvas>
+            <canvas ref="canvasRef" width="300" height="300" class="rounded-full shadow-inner bg-transparent"></canvas>
           </div>
 
           <button 
             @click="spinTheWheel" 
             :disabled="isSpinning || studentsListRaw.length === 0"
-            class="mt-6 w-full max-w-[280px] py-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:to-pink-600 disabled:from-slate-800 disabled:to-slate-800 disabled:opacity-40 text-white font-black text-xs tracking-widest rounded-xl shadow-lg shadow-indigo-500/10 active:scale-98 transition-all flex items-center justify-center gap-2"
+            class="mt-6 w-full max-w-[280px] py-3.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:opacity-50 text-white font-bold text-xs tracking-wider rounded-xl shadow-lg shadow-indigo-600/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
           >
-            <span v-if="isSpinning" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-            {{ isSpinning ? 'SEDANG MENGACAK...' : '🎡 PUTAR RODA SPINNER' }}
+            <Loader2 v-if="isSpinning" class="w-4 h-4 animate-spin" />
+            <Sparkles v-else class="w-4 h-4" />
+            {{ isSpinning ? 'MENGACAK...' : 'PUTAR RODA' }}
           </button>
           
-          <div v-if="pemenangSaatIni" class="mt-4 p-3 bg-emerald-500 text-white font-black rounded-xl text-center shadow animate-pulse w-full max-w-[280px] text-xs tracking-wider">
-            🎉 TERPILIH: {{ pemenangSaatIni }}
+          <div v-if="pemenangSaatIni" class="mt-4 p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold rounded-xl text-center w-full max-w-[280px] text-xs tracking-wide flex items-center justify-center gap-2">
+            <CheckCircle2 class="w-4 h-4" /> Terpilih: {{ pemenangSaatIni }}
           </div>
         </div>
 
-        <!-- KOLOM 3: HASIL URUTAN HAFALAN -->
-        <div class="bg-slate-900/50 p-5 rounded-2xl border border-slate-700/60 h-full flex flex-col justify-between min-h-[420px]">
+        <!-- KOLOM 3: HASIL URUTAN -->
+        <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-800 h-full flex flex-col justify-between min-h-[440px]">
           <div class="w-full">
-            <h3 class="font-bold text-sm text-indigo-300 tracking-wide uppercase mb-4 flex items-center justify-between">
-              <span>📋 Hasil Urutan Giliran</span>
-              <span class="text-[11px] bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-full font-bold">
+            <h3 class="font-semibold text-xs text-indigo-400 tracking-wider uppercase mb-4 flex items-center justify-between">
+              <span class="flex items-center gap-2">
+                <ClipboardList class="w-4 h-4" /> Hasil Giliran
+              </span>
+              <span class="text-[10px] bg-indigo-500/10 text-indigo-400 px-2.5 py-0.5 rounded-full font-bold border border-indigo-500/20">
                 {{ urutanHafalan.length }} Terpilih
               </span>
             </h3>
             
-            <div v-if="urutanHafalan.length === 0" class="border border-dashed border-slate-700 p-8 rounded-xl text-center text-xs text-slate-500">
-              Belum ada antrean. Klik <strong class="text-indigo-400">Putar Roda</strong> untuk mengundi giliran!
+            <div v-if="urutanHafalan.length === 0" class="border border-dashed border-slate-800 p-8 rounded-xl text-center text-xs text-slate-500">
+              Belum ada antrean. Klik <strong class="text-slate-300">Putar Roda</strong> untuk mengundi.
             </div>
 
             <div v-else class="space-y-2 max-h-[300px] overflow-y-auto pr-1">
               <div 
                 v-for="(name, index) in urutanHafalan" 
                 :key="index"
-                class="flex items-center gap-3 p-3 rounded-xl border border-slate-700/60 bg-slate-800/40 shadow-sm transition-all duration-300 hover:border-slate-600"
+                class="flex items-center gap-3 p-3 rounded-xl border border-slate-800 bg-slate-900/60 transition-all hover:border-slate-700"
               >
                 <span 
-                  class="w-6 h-6 flex items-center justify-center rounded-lg font-black text-xs"
-                  :class="index === 0 ? 'bg-amber-500 text-white animate-pulse' : 'bg-slate-700 text-slate-300'"
+                  class="w-6 h-6 flex items-center justify-center rounded-lg font-bold text-xs"
+                  :class="index === 0 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-slate-800 text-slate-400'"
                 >
                   {{ index + 1 }}
                 </span>
                 
-                <span class="font-bold text-sm text-slate-200 truncate">{{ name }}</span>
+                <span class="font-medium text-xs text-slate-200 truncate">{{ name }}</span>
                 
-                <span v-if="index === 0" class="text-[9px] px-2 py-0.5 bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded font-black ml-auto uppercase tracking-wider">
-                  Maju ke-1
+                <span v-if="index === 0" class="text-[9px] px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded font-semibold ml-auto uppercase tracking-wider">
+                  Maju Utama
                 </span>
               </div>
             </div>
           </div>
           
-          <div class="mt-4 p-3 bg-slate-900 rounded-xl text-[11px] flex justify-between items-center text-slate-400 border border-slate-800">
-            <span>Sisa di dalam roda: <strong class="text-indigo-400 font-bold">{{ studentsListRaw.length }} anak</strong></span>
-            <span v-if="studentsListRaw.length === 0 && urutanHafalan.length > 0" class="text-emerald-400 font-black tracking-wide">
-              SEMUA SELESAI! ✨
+          <div class="mt-4 p-3 bg-slate-900/80 rounded-xl text-[11px] flex justify-between items-center text-slate-400 border border-slate-800">
+            <span class="flex items-center gap-1.5">
+              <Users class="w-3.5 h-3.5 text-slate-500" /> Sisa di roda: <strong class="text-slate-200 font-semibold">{{ studentsListRaw.length }}</strong>
+            </span>
+            <span v-if="studentsListRaw.length === 0 && urutanHafalan.length > 0" class="text-emerald-400 font-bold text-[10px] tracking-wide uppercase">
+              Selesai All
             </span>
           </div>
         </div>
