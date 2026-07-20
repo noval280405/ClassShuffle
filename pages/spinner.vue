@@ -404,52 +404,64 @@ const resetAll = () => {
       "
     >
       <!-- Header -->
-     <div 
-  class="border-b pb-5 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors duration-300"
-  :class="isDarkMode ? 'border-slate-800' : 'border-slate-200'"
->
-  <!-- Sisi Kiri: Judul & Status -->
-  <div class="flex flex-col items-center sm:items-start text-center sm:text-left">
-    <h1 
-      class="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight flex items-center justify-center sm:justify-start gap-2.5 sm:gap-3 transition-colors duration-300"
-      :class="isDarkMode ? 'text-white' : 'text-slate-900'"
-    >
-      <div class="p-1.5 sm:p-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-500 shrink-0">
-        <Disc class="w-5 h-5 sm:w-6 sm:h-6 animate-spin-slow" />
-      </div>
-      <span class="truncate">Random Spinner System</span>
-    </h1>
-    
-    <p 
-      class="text-[11px] sm:text-xs mt-1.5 flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2 transition-colors duration-300"
-      :class="isDarkMode ? 'text-slate-400' : 'text-slate-500'"
-    >
-      <span class="inline-flex items-center gap-1.5 text-emerald-500 font-medium shrink-0">
-        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        Tersinkronisasi
-      </span>
-      <span :class="isDarkMode ? 'text-slate-600' : 'text-slate-300'">:</span>
-      <span class="truncate max-w-[200px] sm:max-w-none">
-        <strong :class="isDarkMode ? 'text-slate-300' : 'text-slate-700'">
-          {{ currentUser?.email || 'Aktif' }}
-        </strong>
-      </span>
-    </p>
-  </div>
+      <div
+        class="border-b pb-5 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors duration-300"
+        :class="isDarkMode ? 'border-slate-800' : 'border-slate-200'"
+      >
+        <!-- Sisi Kiri: Judul & Status -->
+        <div
+          class="flex flex-col items-center sm:items-start text-center sm:text-left"
+        >
+          <h1
+            class="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight flex items-center justify-center sm:justify-start gap-2.5 sm:gap-3 transition-colors duration-300"
+            :class="isDarkMode ? 'text-white' : 'text-slate-900'"
+          >
+            <div
+              class="p-1.5 sm:p-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-500 shrink-0"
+            >
+              <Disc class="w-5 h-5 sm:w-6 sm:h-6 animate-spin-slow" />
+            </div>
+            <span class="truncate">Random Spinner System</span>
+          </h1>
 
-  <!-- Sisi Kanan: Tombol Toggle Dark/Light Mode -->
-  <button
-    @click="toggleTheme"
-    class="w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 transition-all duration-300 shadow-sm shrink-0 active:scale-95"
-    :class="isDarkMode 
-      ? 'bg-slate-800 border-slate-700 text-amber-400 hover:bg-slate-700' 
-      : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'"
-  >
-    <Sun v-if="isDarkMode" class="w-4 h-4" />
-    <Moon v-else class="w-4 h-4 text-indigo-600" />
-    <span>{{ isDarkMode ? 'Light Mode' : 'Dark Mode' }}</span>
-  </button>
-</div>
+          <p
+            class="text-[11px] sm:text-xs mt-1.5 flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2 transition-colors duration-300"
+            :class="isDarkMode ? 'text-slate-400' : 'text-slate-500'"
+          >
+            <span
+              class="inline-flex items-center gap-1.5 text-emerald-500 font-medium shrink-0"
+            >
+              <span
+                class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
+              ></span>
+              Tersinkronisasi
+            </span>
+            <span :class="isDarkMode ? 'text-slate-600' : 'text-slate-300'"
+              >:</span
+            >
+            <span class="truncate max-w-[200px] sm:max-w-none">
+              <strong :class="isDarkMode ? 'text-slate-300' : 'text-slate-700'">
+                {{ currentUser?.email || "Aktif" }}
+              </strong>
+            </span>
+          </p>
+        </div>
+
+        <!-- Sisi Kanan: Tombol Toggle Dark/Light Mode -->
+        <button
+          @click="toggleTheme"
+          class="w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 transition-all duration-300 shadow-sm shrink-0 active:scale-95"
+          :class="
+            isDarkMode
+              ? 'bg-slate-800 border-slate-700 text-amber-400 hover:bg-slate-700'
+              : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
+          "
+        >
+          <Sun v-if="isDarkMode" class="w-4 h-4" />
+          <Moon v-else class="w-4 h-4 text-indigo-600" />
+          <span>{{ isDarkMode ? "Light Mode" : "Dark Mode" }}</span>
+        </button>
+      </div>
 
       <!-- Grid 3 Kolom Desktop -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
