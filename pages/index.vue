@@ -24,12 +24,12 @@
           </div>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 sm:gap-3">
           <div class="hidden md:block text-right">
             <p
               class="text-xs font-bold text-slate-900 dark:text-white truncate max-w-[150px]"
             >
-              {{ currentUser.email }}
+              {{ currentUser?.email }}
             </p>
             <p
               class="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium"
@@ -37,16 +37,29 @@
               <i class="fa-solid fa-cloud"></i> Sesi Cloud Aktif
             </p>
           </div>
+
+          <!-- Tombol Kembali Ke Index (Beranda) -->
+          <NuxtLink
+            to="/spinner"
+            class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 w-9 h-9 flex items-center justify-center transition border border-slate-200/50 dark:border-slate-600/50"
+            title="Spinner"
+          >
+            <i class="fa-solid fa-dharmachakra"></i>
+          </NuxtLink>
+
+          <!-- Tombol Ubah Tema -->
           <button
             @click="isDarkMode = !isDarkMode"
-            class="p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-amber-400 w-9 h-9 flex items-center justify-center transition"
+            class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-amber-400 w-9 h-9 flex items-center justify-center transition border border-slate-200/50 dark:border-slate-600/50"
             title="Ubah Tema"
           >
             <i :class="isDarkMode ? 'fa-solid fa-sun' : 'fa-solid fa-moon'"></i>
           </button>
+
+          <!-- Tombol Logout -->
           <button
             @click="handleLogout"
-            class="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 hover:bg-rose-100 w-9 h-9 flex items-center justify-center border border-rose-200/50 transition"
+            class="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 w-9 h-9 flex items-center justify-center border border-rose-200/50 transition"
             title="Keluar Aplikasi"
           >
             <i class="fa-solid fa-right-from-bracket"></i>

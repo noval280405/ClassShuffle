@@ -389,370 +389,312 @@ const resetAll = () => {
 </script>
 
 <template>
-  <div
-    class="min-h-screen p-4 md:p-8 flex flex-col justify-center items-center font-sans transition-colors duration-300"
-    :class="
-      isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-100 text-slate-800'
-    "
-  >
-    <div
-      class="w-full max-w-7xl backdrop-blur-xl border rounded-3xl p-6 md:p-8 shadow-2xl transition-colors duration-300"
-      :class="
-        isDarkMode
-          ? 'bg-slate-900/80 border-slate-800'
-          : 'bg-white/90 border-slate-200'
-      "
+  <div v-if="currentUser">
+    <!-- HEADER KONSISTEN -->
+    <header
+      class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 sticky top-0 z-40 py-4 mb-8 shadow-sm dark:shadow-lg"
     >
-      <!-- Header -->
-      <div
-        class="border-b pb-5 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors duration-300"
-        :class="isDarkMode ? 'border-slate-800' : 'border-slate-200'"
-      >
-        <!-- Sisi Kiri: Judul & Status -->
-        <div
-          class="flex flex-col items-center sm:items-start text-center sm:text-left"
-        >
-          <h1
-            class="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight flex items-center justify-center sm:justify-start gap-2.5 sm:gap-3 transition-colors duration-300"
-            :class="isDarkMode ? 'text-white' : 'text-slate-900'"
-          >
-            <div
-              class="p-1.5 sm:p-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-500 shrink-0"
-            >
-              <Disc class="w-5 h-5 sm:w-6 sm:h-6 animate-spin-slow" />
-            </div>
-            <span class="truncate">Random Spinner System</span>
-          </h1>
-
-          <p
-            class="text-[11px] sm:text-xs mt-1.5 flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2 transition-colors duration-300"
-            :class="isDarkMode ? 'text-slate-400' : 'text-slate-500'"
-          >
-            <span
-              class="inline-flex items-center gap-1.5 text-emerald-500 font-medium shrink-0"
-            >
-              <span
-                class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
-              ></span>
-              Tersinkronisasi
-            </span>
-            <span :class="isDarkMode ? 'text-slate-600' : 'text-slate-300'"
-              >:</span
-            >
-            <span class="truncate max-w-[200px] sm:max-w-none">
-              <strong :class="isDarkMode ? 'text-slate-300' : 'text-slate-700'">
-                {{ currentUser?.email || "Aktif" }}
-              </strong>
-            </span>
-          </p>
-        </div>
-
-        <!-- Sisi Kanan: Tombol Toggle Dark/Light Mode -->
-        <button
-          @click="toggleTheme"
-          class="w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 transition-all duration-300 shadow-sm shrink-0 active:scale-95"
-          :class="
-            isDarkMode
-              ? 'bg-slate-800 border-slate-700 text-amber-400 hover:bg-slate-700'
-              : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
-          "
-        >
-          <Sun v-if="isDarkMode" class="w-4 h-4" />
-          <Moon v-else class="w-4 h-4 text-indigo-600" />
-          <span>{{ isDarkMode ? "Light Mode" : "Dark Mode" }}</span>
-        </button>
-      </div>
-
-      <!-- Grid 3 Kolom Desktop -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <!-- KOLOM 1: MANAJEMEN KELAS & SISWA -->
-        <div
-          class="p-5 rounded-2xl border h-full flex flex-col justify-between transition-colors duration-300"
-          :class="
-            isDarkMode
-              ? 'bg-slate-950/40 border-slate-800/80'
-              : 'bg-slate-50 border-slate-200'
-          "
-        >
+      <div class="container mx-auto px-4 flex justify-between items-center">
+        <!-- Brand / Logo -->
+        <div class="flex items-center gap-3">
+          <i
+            class="fa-solid fa-shuffle text-2xl text-indigo-600 dark:text-indigo-400"
+          ></i>
           <div>
-            <!-- Section Pilih Kelas -->
-            <div
-              class="mb-5 pb-5 border-b transition-colors duration-300"
-              :class="isDarkMode ? 'border-slate-800' : 'border-slate-200'"
+            <h1
+              class="text-2xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-pink-400 bg-clip-text text-transparent tracking-tight"
             >
-              <label
-                class="font-semibold text-xs text-indigo-500 tracking-wider uppercase flex items-center gap-2 mb-2.5"
-              >
-                <School class="w-4 h-4" /> Pilih Kelas
-              </label>
-
-              <div class="flex gap-2 mb-3">
-                <select
-                  :value="activeClassId"
-                  @change="selectClass($event.target.value)"
-                  :disabled="isSpinning || classes.length === 0"
-                  class="flex-1 p-2.5 border rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500/50 focus:outline-none transition-all"
-                  :class="
-                    isDarkMode
-                      ? 'bg-slate-900 border-slate-700/80 text-slate-200'
-                      : 'bg-white border-slate-300 text-slate-800'
-                  "
-                >
-                  <option v-if="classes.length === 0" value="">
-                    Belum ada kelas
-                  </option>
-                  <option v-for="cls in classes" :key="cls.id" :value="cls.id">
-                    {{ cls.name }}
-                  </option>
-                </select>
-
-                <button
-                  v-if="activeClassId"
-                  @click="removeClass(activeClassId)"
-                  :disabled="isSpinning"
-                  title="Hapus Kelas"
-                  class="p-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/20 rounded-xl transition-all"
-                >
-                  <Trash2 class="w-4 h-4" />
-                </button>
-              </div>
-
-              <!-- Input Tambah Kelas Baru -->
-              <div class="flex gap-2">
-                <input
-                  type="text"
-                  v-model="newClassName"
-                  placeholder="Nama kelas baru..."
-                  class="flex-1 px-3 py-2 border rounded-lg text-xs placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all"
-                  :class="
-                    isDarkMode
-                      ? 'bg-slate-900 border-slate-800 text-slate-200'
-                      : 'bg-white border-slate-300 text-slate-800'
-                  "
-                  @keyup.enter="addClass"
-                />
-                <button
-                  @click="addClass"
-                  class="px-3 py-2 border font-semibold text-xs rounded-lg transition-all flex items-center gap-1"
-                  :class="
-                    isDarkMode
-                      ? 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
-                      : 'bg-slate-200 hover:bg-slate-300 border-slate-300 text-slate-800'
-                  "
-                >
-                  <Plus class="w-3.5 h-3.5" /> Buat
-                </button>
-              </div>
-            </div>
-
-            <!-- Section Input Nama Siswa -->
-            <div class="flex items-center justify-between mb-2.5">
-              <label
-                class="font-semibold text-xs text-indigo-500 tracking-wider uppercase flex items-center gap-2"
-              >
-                <FileText class="w-4 h-4" /> Daftar Siswa
-              </label>
+              Kelompokin
               <span
-                class="text-[10px] px-2 py-0.5 rounded border transition-colors duration-300"
-                :class="
-                  isDarkMode
-                    ? 'bg-slate-900 text-slate-400 border-slate-800'
-                    : 'bg-slate-200 text-slate-600 border-slate-300'
-                "
+                class="text-xs font-semibold bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded ml-2"
+                >v4.0 cloud</span
               >
-                1 Nama / Baris
-              </span>
-            </div>
-
-            <textarea
-              v-model="namesInput"
-              :disabled="isSpinning || !activeClassId"
-              rows="7"
-              placeholder="Masukkan nama siswa..."
-              class="w-full p-3.5 border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/50 font-mono placeholder-slate-400 resize-none transition-all"
-              :class="
-                isDarkMode
-                  ? 'bg-slate-900 border-slate-800 text-slate-200'
-                  : 'bg-white border-slate-300 text-slate-800'
-              "
-            ></textarea>
-          </div>
-
-          <!-- Tombol Aksi -->
-          <div class="mt-5 flex flex-col gap-2">
-            <button
-              @click="syncStudentsFromTextarea"
-              :disabled="isSpinning || !activeClassId"
-              class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold text-xs rounded-xl transition-all shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2"
-            >
-              <CloudUpload class="w-4 h-4" /> Simpan Ke Cloud
-            </button>
-            <button
-              @click="resetAll"
-              :disabled="isSpinning || !activeClassId"
-              class="w-full py-2 border font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-2"
-              :class="
-                isDarkMode
-                  ? 'bg-slate-900 hover:bg-slate-800 border-slate-800 text-slate-400 hover:text-slate-200'
-                  : 'bg-white hover:bg-slate-100 border-slate-300 text-slate-600 hover:text-slate-900'
-              "
-            >
-              <RotateCcw class="w-3.5 h-3.5" /> Reset Urutan
-            </button>
+            </h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400">
+              Multi-User Cloud Platform
+            </p>
           </div>
         </div>
 
-        <!-- KOLOM 2: SPINNER CANVAS -->
-        <div
-          class="flex flex-col items-center justify-center p-6 rounded-2xl border h-full min-h-[440px] transition-colors duration-300"
-          :class="
-            isDarkMode
-              ? 'bg-slate-950/40 border-slate-800'
-              : 'bg-slate-50 border-slate-200'
-          "
-        >
-          <div
-            class="relative w-[310px] h-[310px] flex items-center justify-center p-2 rounded-full border shadow-2xl transition-colors duration-300"
-            :class="
-              isDarkMode
-                ? 'border-slate-800 bg-slate-900'
-                : 'border-slate-200 bg-white'
-            "
-          >
-            <!-- Jarum Penunjuk Fisik -->
-            <div
-              class="absolute -top-2 left-1/2 -translate-x-1/2 z-20 w-0 h-0 border-l-[14px] border-l-transparent border-r-[14px] border-r-transparent border-t-[28px] border-t-rose-500 filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.3)]"
-            ></div>
-
-            <canvas
-              ref="canvasRef"
-              width="300"
-              height="300"
-              class="rounded-full shadow-inner bg-transparent"
-            ></canvas>
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <div class="hidden md:block text-right">
+            <p
+              class="text-xs font-bold text-slate-900 dark:text-white truncate max-w-[150px]"
+            >
+              {{ currentUser?.email }}
+            </p>
+            <p
+              class="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium"
+            >
+              <i class="fa-solid fa-cloud"></i> Sesi Cloud Aktif
+            </p>
           </div>
 
-          <button
-            @click="spinTheWheel"
-            :disabled="isSpinning || studentsListRaw.length === 0"
-            class="mt-6 w-full max-w-[280px] py-3.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-300 disabled:dark:bg-slate-800 disabled:opacity-50 text-white font-bold text-xs tracking-wider rounded-xl shadow-lg shadow-indigo-600/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+          <!-- Tombol Navigasi Kembali ke Bagi Kelompok (index.vue) -->
+          <NuxtLink
+            to="/"
+            class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 w-9 h-9 flex items-center justify-center transition border border-slate-200/50 dark:border-slate-600/50"
+            title="Bagi Kelompok"
           >
-            <Loader2 v-if="isSpinning" class="w-4 h-4 animate-spin" />
-            <Sparkles v-else class="w-4 h-4" />
-            {{ isSpinning ? "MENGACAK..." : "PUTAR RODA" }}
+            <i class="fa-solid fa-users-rectangle"></i>
+          </NuxtLink>
+
+          <!-- Tombol Ubah Tema -->
+          <button
+            @click="isDarkMode = !isDarkMode"
+            class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-amber-400 w-9 h-9 flex items-center justify-center transition border border-slate-200/50 dark:border-slate-600/50"
+            title="Ubah Tema"
+          >
+            <i :class="isDarkMode ? 'fa-solid fa-sun' : 'fa-solid fa-moon'"></i>
           </button>
 
-          <div
-            v-if="pemenangSaatIni"
-            class="mt-4 p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 font-bold rounded-xl text-center w-full max-w-[280px] text-xs tracking-wide flex items-center justify-center gap-2"
+          <!-- Tombol Logout -->
+          <button
+            @click="handleLogout"
+            class="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 w-9 h-9 flex items-center justify-center border border-rose-200/50 transition"
+            title="Keluar Aplikasi"
           >
-            <CheckCircle2 class="w-4 h-4" /> Terpilih: {{ pemenangSaatIni }}
-          </div>
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
         </div>
+      </div>
+    </header>
 
-        <!-- KOLOM 3: HASIL URUTAN -->
-        <div
-          class="p-5 rounded-2xl border h-full flex flex-col justify-between min-h-[440px] transition-colors duration-300"
-          :class="
-            isDarkMode
-              ? 'bg-slate-950/40 border-slate-800'
-              : 'bg-slate-50 border-slate-200'
-          "
-        >
-          <div class="w-full">
-            <h3
-              class="font-semibold text-xs text-indigo-500 tracking-wider uppercase mb-4 flex items-center justify-between"
-            >
-              <span class="flex items-center gap-2">
-                <ClipboardList class="w-4 h-4" /> Hasil Giliran
-              </span>
-              <span
-                class="text-[10px] bg-indigo-500/10 text-indigo-500 px-2.5 py-0.5 rounded-full font-bold border border-indigo-500/20"
-              >
-                {{ urutanHafalan.length }} Terpilih
-              </span>
-            </h3>
-
-            <div
-              v-if="urutanHafalan.length === 0"
-              class="border border-dashed p-8 rounded-xl text-center text-xs transition-colors duration-300"
-              :class="
-                isDarkMode
-                  ? 'border-slate-800 text-slate-500'
-                  : 'border-slate-300 text-slate-400'
-              "
-            >
-              Belum ada antrean. Klik
-              <strong :class="isDarkMode ? 'text-slate-300' : 'text-slate-700'"
-                >Putar Roda</strong
-              >
-              untuk mengundi.
-            </div>
-
-            <div v-else class="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+    <!-- MAIN CONTAINER (DISAMAKAN DENGAN INDEX.VUE) -->
+    <main class="container mx-auto px-4 max-w-6xl pb-12">
+      <div
+        class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 md:p-8 shadow-xl"
+      >
+        <!-- Grid 3 Kolom Desktop -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          <!-- KOLOM 1: MANAJEMEN KELAS & SISWA -->
+          <div
+            class="p-5 rounded-2xl border bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-700/60 h-full flex flex-col justify-between"
+          >
+            <div>
+              <!-- Section Pilih Kelas -->
               <div
-                v-for="(name, index) in urutanHafalan"
-                :key="index"
-                class="flex items-center gap-3 p-3 rounded-xl border transition-all"
-                :class="
-                  isDarkMode
-                    ? 'border-slate-800 bg-slate-900/60 hover:border-slate-700'
-                    : 'border-slate-200 bg-white hover:border-slate-300'
-                "
+                class="mb-5 pb-5 border-b border-slate-200 dark:border-slate-700/60"
               >
-                <span
-                  class="w-6 h-6 flex items-center justify-center rounded-lg font-bold text-xs"
-                  :class="
-                    index === 0
-                      ? 'bg-amber-500/20 text-amber-500 border border-amber-500/30'
-                      : isDarkMode
-                        ? 'bg-slate-800 text-slate-400'
-                        : 'bg-slate-100 text-slate-600'
-                  "
+                <label
+                  class="font-semibold text-xs text-indigo-600 dark:text-indigo-400 tracking-wider uppercase flex items-center gap-2 mb-2.5"
                 >
-                  {{ index + 1 }}
-                </span>
+                  <School class="w-4 h-4" /> Pilih Kelas
+                </label>
 
-                <span
-                  class="font-medium text-xs truncate"
-                  :class="isDarkMode ? 'text-slate-200' : 'text-slate-800'"
-                  >{{ name }}</span
-                >
+                <div class="flex gap-2 mb-3">
+                  <select
+                    :value="activeClassId"
+                    @change="selectClass($event.target.value)"
+                    :disabled="isSpinning || classes.length === 0"
+                    class="flex-1 p-2.5 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all"
+                  >
+                    <option v-if="classes.length === 0" value="">
+                      Belum ada kelas
+                    </option>
+                    <option
+                      v-for="cls in classes"
+                      :key="cls.id"
+                      :value="cls.id"
+                    >
+                      {{ cls.name }}
+                    </option>
+                  </select>
 
-                <span
-                  v-if="index === 0"
-                  class="text-[9px] px-2 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded font-semibold ml-auto uppercase tracking-wider"
+                  <button
+                    v-if="activeClassId"
+                    @click="removeClass(activeClassId)"
+                    :disabled="isSpinning"
+                    title="Hapus Kelas"
+                    class="p-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 rounded-xl transition-all"
+                  >
+                    <Trash2 class="w-4 h-4" />
+                  </button>
+                </div>
+
+                <!-- Input Tambah Kelas Baru -->
+                <div class="flex gap-2">
+                  <input
+                    type="text"
+                    v-model="newClassName"
+                    placeholder="Nama kelas baru..."
+                    class="flex-1 px-3 py-2 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-200 rounded-lg text-xs placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                    @keyup.enter="addClass"
+                  />
+                  <button
+                    @click="addClass"
+                    class="px-3 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-200 font-semibold text-xs rounded-lg transition-all flex items-center gap-1"
+                  >
+                    <Plus class="w-3.5 h-3.5" /> Buat
+                  </button>
+                </div>
+              </div>
+
+              <!-- Section Input Nama Siswa -->
+              <div class="flex items-center justify-between mb-2.5">
+                <label
+                  class="font-semibold text-xs text-indigo-600 dark:text-indigo-400 tracking-wider uppercase flex items-center gap-2"
                 >
-                  Maju Utama
+                  <FileText class="w-4 h-4" /> Daftar Siswa
+                </label>
+                <span
+                  class="text-[10px] px-2 py-0.5 rounded border bg-slate-200/60 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700"
+                >
+                  1 Nama / Baris
                 </span>
               </div>
+
+              <textarea
+                v-model="namesInput"
+                :disabled="isSpinning || !activeClassId"
+                rows="7"
+                placeholder="Masukkan nama siswa..."
+                class="w-full p-3.5 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono placeholder-slate-400 resize-none transition-all"
+              ></textarea>
+            </div>
+
+            <!-- Tombol Aksi -->
+            <div class="mt-5 flex flex-col gap-2">
+              <button
+                @click="syncStudentsFromTextarea"
+                :disabled="isSpinning || !activeClassId"
+                class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 disabled:text-slate-400 text-white font-semibold text-xs rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
+              >
+                <CloudUpload class="w-4 h-4" /> Simpan Ke Cloud
+              </button>
+              <button
+                @click="resetAll"
+                :disabled="isSpinning || !activeClassId"
+                class="w-full py-2 bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-2"
+              >
+                <RotateCcw class="w-3.5 h-3.5" /> Reset Urutan
+              </button>
             </div>
           </div>
 
+          <!-- KOLOM 2: SPINNER CANVAS -->
           <div
-            class="mt-4 p-3 rounded-xl text-[11px] flex justify-between items-center border transition-colors duration-300"
-            :class="
-              isDarkMode
-                ? 'bg-slate-900/80 text-slate-400 border-slate-800'
-                : 'bg-white text-slate-600 border-slate-200'
-            "
+            class="flex flex-col items-center justify-center p-6 rounded-2xl border bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-700/60 h-full min-h-[440px]"
           >
-            <span class="flex items-center gap-1.5">
-              <Users class="w-3.5 h-3.5 text-slate-400" /> Sisa di roda:
-              <strong
-                :class="isDarkMode ? 'text-slate-200' : 'text-slate-800'"
-                >{{ studentsListRaw.length }}</strong
-              >
-            </span>
-            <span
-              v-if="studentsListRaw.length === 0 && urutanHafalan.length > 0"
-              class="text-emerald-500 font-bold text-[10px] tracking-wide uppercase"
+            <div
+              class="relative w-[310px] h-[310px] flex items-center justify-center p-2 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl"
             >
-              Selesai All
-            </span>
+              <!-- Jarum Penunjuk Fisik -->
+              <div
+                class="absolute -top-2 left-1/2 -translate-x-1/2 z-20 w-0 h-0 border-l-[14px] border-l-transparent border-r-[14px] border-r-transparent border-t-[28px] border-t-rose-500 filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.3)]"
+              ></div>
+
+              <canvas
+                ref="canvasRef"
+                width="300"
+                height="300"
+                class="rounded-full bg-transparent"
+              ></canvas>
+            </div>
+
+            <button
+              @click="spinTheWheel"
+              :disabled="isSpinning || studentsListRaw.length === 0"
+              class="mt-6 w-full max-w-[280px] py-3.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-slate-300 dark:disabled:from-slate-700 text-white font-bold text-xs tracking-wider rounded-xl shadow-lg active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+            >
+              <Loader2 v-if="isSpinning" class="w-4 h-4 animate-spin" />
+              <Sparkles v-else class="w-4 h-4" />
+              {{ isSpinning ? "MENGACAK..." : "PUTAR RODA" }}
+            </button>
+
+            <div
+              v-if="pemenangSaatIni"
+              class="mt-4 p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold rounded-xl text-center w-full max-w-[280px] text-xs tracking-wide flex items-center justify-center gap-2"
+            >
+              <CheckCircle2 class="w-4 h-4" /> Terpilih: {{ pemenangSaatIni }}
+            </div>
+          </div>
+
+          <!-- KOLOM 3: HASIL URUTAN -->
+          <div
+            class="p-5 rounded-2xl border bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-700/60 h-full flex flex-col justify-between min-h-[440px]"
+          >
+            <div class="w-full">
+              <h3
+                class="font-semibold text-xs text-indigo-600 dark:text-indigo-400 tracking-wider uppercase mb-4 flex items-center justify-between"
+              >
+                <span class="flex items-center gap-2">
+                  <ClipboardList class="w-4 h-4" /> Hasil Giliran
+                </span>
+                <span
+                  class="text-[10px] bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 px-2.5 py-0.5 rounded-full font-bold border border-indigo-500/20"
+                >
+                  {{ urutanHafalan.length }} Terpilih
+                </span>
+              </h3>
+
+              <div
+                v-if="urutanHafalan.length === 0"
+                class="border border-dashed border-slate-300 dark:border-slate-700 p-8 rounded-xl text-center text-xs text-slate-400 dark:text-slate-500"
+              >
+                Belum ada antrean. Klik
+                <strong class="text-slate-700 dark:text-slate-300"
+                  >Putar Roda</strong
+                >
+                untuk mengundi.
+              </div>
+
+              <div
+                v-else
+                class="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar"
+              >
+                <div
+                  v-for="(name, index) in urutanHafalan"
+                  :key="index"
+                  class="flex items-center gap-3 p-3 rounded-xl border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700/60 transition-all"
+                >
+                  <span
+                    class="w-6 h-6 flex items-center justify-center rounded-lg font-bold text-xs"
+                    :class="
+                      index === 0
+                        ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30'
+                        : 'bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300'
+                    "
+                  >
+                    {{ index + 1 }}
+                  </span>
+
+                  <span
+                    class="font-medium text-xs truncate text-slate-800 dark:text-slate-200"
+                  >
+                    {{ name }}
+                  </span>
+
+                  <span
+                    v-if="index === 0"
+                    class="text-[9px] px-2 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded font-semibold ml-auto uppercase tracking-wider"
+                  >
+                    Maju Utama
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="mt-4 p-3 rounded-xl text-[11px] flex justify-between items-center border bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700/60"
+            >
+              <span class="flex items-center gap-1.5">
+                <Users class="w-3.5 h-3.5 text-slate-400" /> Sisa di roda:
+                <strong class="text-slate-800 dark:text-slate-200">{{
+                  studentsListRaw.length
+                }}</strong>
+              </span>
+              <span
+                v-if="studentsListRaw.length === 0 && urutanHafalan.length > 0"
+                class="text-emerald-600 dark:text-emerald-400 font-bold text-[10px] tracking-wide uppercase"
+              >
+                Selesai All
+              </span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </main>
   </div>
 </template>
