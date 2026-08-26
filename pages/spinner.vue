@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import {
   collection,
   getDocs,
@@ -7,6 +7,7 @@ import {
   setDoc,
   deleteDoc,
 } from "firebase/firestore";
+import { signOut } from "firebase/auth";
 
 // Import Ikon Lucide untuk tampilan premium
 import {
@@ -51,6 +52,10 @@ const urutanHafalan = ref([]);
 const pemenangSaatIni = ref("");
 const isSpinning = ref(false);
 const canvasRef = ref(null);
+const presentationRef = ref(null);
+const isFullscreen = ref(false);
+const syncStatus = ref("saved");
+const { notify, ask } = useNotifications();
 
 // Palette Warna Roda Spinner
 const spinnerColors = [
@@ -89,7 +94,17 @@ onMounted(() => {
     currentUser.value = $auth.currentUser;
     fetchClassesFromCloud($auth.currentUser.uid);
   }
+  document.addEventListener("fullscreenchange", handleFullscreenChange);
 });
+onBeforeUnmount(() => document.removeEventListener("fullscreenchange", handleFullscreenChange));
+
+const handleFullscreenChange = () => { isFullscreen.value = Boolean(document.fullscreenElement); setTimeout(drawWheel, 100); };
+const toggleFullscreen = async () => {
+  try {
+    if (!document.fullscreenElement) await presentationRef.value?.requestFullscreen();
+    else await document.exitFullscreen();
+  } catch { notify("Mode fullscreen tidak didukung browser ini.", "error"); }
+};
 
 // ==========================================
 // 1. INTEGRASI FIRESTORE (DAFTAR KELAS & SISWA)
@@ -153,7 +168,7 @@ const addClass = async () => {
   if (!name || !currentUser.value) return;
 
   if (classes.value.some((c) => c.id.toLowerCase() === name.toLowerCase())) {
-    alert("Nama kelas tersebut sudah ada!");
+    notify("Nama kelas tersebut sudah ada.", "warning");
     return;
   }
 
@@ -170,13 +185,14 @@ const addClass = async () => {
     classes.value.push({ id: name, name: name });
     newClassName.value = "";
     selectClass(name);
+    notify(`Kelas ${name} berhasil dibuat.`, "success");
   } catch (err) {
     console.error("Gagal membuat kelas baru:", err);
   }
 };
 
 const removeClass = async (id) => {
-  if (confirm(`Hapus permanen seluruh data kelas ${id} dari cloud?`)) {
+  if (await ask(`Hapus permanen seluruh data kelas ${id} dari cloud?`)) {
     try {
       const classDocRef = doc(
         $db,
@@ -197,6 +213,7 @@ const removeClass = async (id) => {
         namesInput.value = "";
         drawWheel();
       }
+      notify(`Kelas ${id} telah dihapus.`, "success");
     } catch (err) {
       console.error("Gagal menghapus kelas:", err);
     }
@@ -208,6 +225,8 @@ const syncStudentsFromTextarea = async () => {
 
   const lines = namesInput.value.split("\n");
   const validNames = lines.map((n) => n.trim()).filter((n) => n.length > 0);
+  const uniqueNames = [...new Map(validNames.map((name) => [name.toLocaleLowerCase("id"), name])).values()];
+  const duplicateCount = validNames.length - uniqueNames.length;
 
   try {
     const studentsCollRef = collection(
@@ -223,8 +242,9 @@ const syncStudentsFromTextarea = async () => {
     const deletePromises = currentDocs.docs.map((d) => deleteDoc(d.ref));
     await Promise.all(deletePromises);
 
+    syncStatus.value = "saving";
     const newStudentsList = [];
-    for (const name of validNames) {
+    for (const name of uniqueNames) {
       const studentId = generateSlug(name);
       const studentDocRef = doc(
         $db,
@@ -243,9 +263,12 @@ const syncStudentsFromTextarea = async () => {
     urutanHafalan.value = [];
     pemenangSaatIni.value = "";
     drawWheel();
-    alert("Daftar siswa berhasil disimpan ke cloud!");
+    syncStatus.value = "saved";
+    notify(`Daftar siswa tersimpan${duplicateCount ? `; ${duplicateCount} nama duplikat dihapus` : ""}.`, "success");
   } catch (err) {
+    syncStatus.value = "error";
     console.error("Gagal menyinkronkan data siswa ke Firestore:", err);
+    notify("Daftar siswa gagal disimpan. Periksa koneksi Anda.", "error");
   }
 };
 
@@ -386,32 +409,36 @@ const resetAll = () => {
     selectClass(activeClassId.value);
   }
 };
+
+const handleLogout = async () => {
+  if (!await ask("Apakah Anda ingin keluar dari sesi Kelompokin?", "Keluar aplikasi")) return;
+  await signOut($auth);
+  navigateTo("/login");
+};
 </script>
 
 <template>
   <div v-if="currentUser">
     <!-- HEADER KONSISTEN -->
     <header
-      class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 sticky top-0 z-40 py-4 mb-8 shadow-sm dark:shadow-lg"
+      class="bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl border-b border-white/70 dark:border-slate-700/80 sticky top-0 z-40 py-3 sm:py-4 mb-6 sm:mb-8 shadow-sm dark:shadow-lg"
     >
       <div class="container mx-auto px-4 flex justify-between items-center">
         <!-- Brand / Logo -->
         <div class="flex items-center gap-3">
-          <i
-            class="fa-solid fa-shuffle text-2xl text-indigo-600 dark:text-indigo-400"
-          ></i>
+          <span class="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500 text-white shadow-lg shadow-indigo-500/25 flex items-center justify-center shrink-0"><i class="fa-solid fa-shuffle text-lg"></i></span>
           <div>
             <h1
-              class="text-2xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-pink-400 bg-clip-text text-transparent tracking-tight"
+              class="text-xl sm:text-2xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-pink-400 bg-clip-text text-transparent tracking-tight"
             >
               Kelompokin
               <span
-                class="text-xs font-semibold bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded ml-2"
+                class="hidden sm:inline text-xs font-semibold bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded ml-2"
                 >v4.0 cloud</span
               >
             </h1>
             <p class="text-xs text-slate-500 dark:text-slate-400">
-              Multi-User Cloud Platform
+              Spinner urutan siswa
             </p>
           </div>
         </div>
@@ -427,14 +454,14 @@ const resetAll = () => {
             <p
               class="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium"
             >
-              <i class="fa-solid fa-cloud"></i> Sesi Cloud Aktif
+              <i :class="syncStatus === 'saving' ? 'fa-solid fa-arrows-rotate animate-spin text-amber-500' : syncStatus === 'error' ? 'fa-solid fa-cloud-exclamation text-rose-500' : 'fa-solid fa-cloud-check'"></i> {{ syncStatus === 'saving' ? 'Menyimpan...' : syncStatus === 'error' ? 'Gagal sinkron' : 'Tersimpan di cloud' }}
             </p>
           </div>
 
           <!-- Tombol Navigasi Kembali ke Bagi Kelompok (index.vue) -->
           <NuxtLink
             to="/"
-            class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 w-9 h-9 flex items-center justify-center transition border border-slate-200/50 dark:border-slate-600/50"
+            class="p-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-500/10 dark:hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 w-11 h-11 flex items-center justify-center transition border border-indigo-200/70 dark:border-indigo-500/20"
             title="Bagi Kelompok"
           >
             <i class="fa-solid fa-users-rectangle"></i>
@@ -443,7 +470,7 @@ const resetAll = () => {
           <!-- Tombol Ubah Tema -->
           <button
             @click="isDarkMode = !isDarkMode"
-            class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-amber-400 w-9 h-9 flex items-center justify-center transition border border-slate-200/50 dark:border-slate-600/50"
+            class="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 text-amber-600 dark:text-amber-300 w-11 h-11 flex items-center justify-center transition border border-amber-200/70 dark:border-amber-500/20"
             title="Ubah Tema"
           >
             <i :class="isDarkMode ? 'fa-solid fa-sun' : 'fa-solid fa-moon'"></i>
@@ -452,7 +479,7 @@ const resetAll = () => {
           <!-- Tombol Logout -->
           <button
             @click="handleLogout"
-            class="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 w-9 h-9 flex items-center justify-center border border-rose-200/50 transition"
+            class="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 w-11 h-11 flex items-center justify-center border border-rose-200/70 transition"
             title="Keluar Aplikasi"
           >
             <i class="fa-solid fa-right-from-bracket"></i>
@@ -464,8 +491,11 @@ const resetAll = () => {
     <!-- MAIN CONTAINER (DISAMAKAN DENGAN INDEX.VUE) -->
     <main class="container mx-auto px-4 max-w-6xl pb-12">
       <div
-        class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 md:p-8 shadow-xl"
+        ref="presentationRef"
+        class="bg-white/90 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 rounded-3xl p-3 sm:p-6 md:p-8 shadow-xl"
+        :class="isFullscreen ? 'min-h-screen rounded-none flex flex-col justify-center bg-white dark:bg-slate-950 overflow-auto' : ''"
       >
+        <button @click="toggleFullscreen" class="mb-4 ml-auto min-h-[44px] px-4 rounded-xl bg-fuchsia-100 dark:bg-fuchsia-500/15 text-fuchsia-700 dark:text-fuchsia-300 font-bold text-xs flex items-center gap-2"><i :class="isFullscreen ? 'fa-solid fa-compress' : 'fa-solid fa-expand'"></i>{{ isFullscreen ? 'Keluar Presentasi' : 'Mode Presentasi' }}</button>
         <!-- Grid 3 Kolom Desktop -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           <!-- KOLOM 1: MANAJEMEN KELAS & SISWA -->
@@ -575,10 +605,10 @@ const resetAll = () => {
 
           <!-- KOLOM 2: SPINNER CANVAS -->
           <div
-            class="flex flex-col items-center justify-center p-6 rounded-2xl border bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-700/60 h-full min-h-[440px]"
+            class="flex flex-col items-center justify-center p-3 sm:p-6 rounded-2xl border bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-700/60 h-full min-h-[390px] sm:min-h-[440px] overflow-hidden"
           >
             <div
-              class="relative w-[310px] h-[310px] flex items-center justify-center p-2 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl"
+              class="spinner-wheel relative w-[min(310px,82vw)] aspect-square flex items-center justify-center p-2 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl"
             >
               <!-- Jarum Penunjuk Fisik -->
               <div
@@ -589,7 +619,7 @@ const resetAll = () => {
                 ref="canvasRef"
                 width="300"
                 height="300"
-                class="rounded-full bg-transparent"
+                class="rounded-full bg-transparent w-full h-full"
               ></canvas>
             </div>
 

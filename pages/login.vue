@@ -1,20 +1,20 @@
 <template>
   <div
-    class="min-h-screen flex items-center justify-center px-4 py-12 bg-slate-100 dark:bg-slate-950"
+    class="min-h-screen flex items-center justify-center px-4 py-8 bg-transparent"
   >
     <div
-      class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 w-full max-w-md rounded-2xl p-8 shadow-2xl relative"
+      class="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white dark:border-slate-700 w-full max-w-md rounded-3xl p-6 sm:p-8 shadow-2xl shadow-indigo-500/10 relative overflow-hidden"
     >
       <button
         @click="isDarkMode = !isDarkMode"
-        class="absolute top-4 right-4 p-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-amber-400"
+        class="absolute top-4 right-4 w-11 h-11 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-300 border border-amber-200/70 dark:border-amber-500/20"
       >
         <i :class="isDarkMode ? 'fa-solid fa-sun' : 'fa-solid fa-moon'"></i>
       </button>
 
       <div class="text-center mb-6">
         <i
-          class="fa-solid fa-shuffle text-4xl text-indigo-600 dark:text-indigo-400 mb-2"
+          class="fa-solid fa-shuffle text-3xl text-white bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500 w-16 h-16 rounded-2xl inline-flex items-center justify-center shadow-lg shadow-indigo-500/25 mb-4"
         ></i>
         <h2 class="text-2xl font-black text-slate-950 dark:text-white">
           Kelompokin Pro
@@ -77,7 +77,7 @@
         <button
           type="submit"
           :disabled="isSubmitting"
-          class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2"
+          class="w-full min-h-[48px] bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold py-3 rounded-xl text-sm transition shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2"
         >
           <i v-if="isSubmitting" class="fa-solid fa-spinner animate-spin"></i>
           Masuk Aplikasi
