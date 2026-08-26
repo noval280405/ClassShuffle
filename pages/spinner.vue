@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
+import { ref, computed, inject, onMounted, onBeforeUnmount, watch } from "vue";
 import {
   collection,
   getDocs,
@@ -30,12 +30,8 @@ import {
 // Mengambil plugin Firebase dari Nuxt App
 const { $auth, $db } = useNuxtApp();
 
-// State Theme (Dark / Light)
-const isDarkMode = ref(true);
-const toggleTheme = () => {
-  isDarkMode.value = !isDarkMode.value;
-  drawWheel(); // Redraw canvas untuk sesuaikan warna background canvas jika kosong
-};
+// Menggunakan state tema global dari app.vue agar seluruh halaman ikut berubah.
+const isDarkMode = inject("isDarkMode");
 
 // State Otentikasi & Firebase Data
 const currentUser = ref(null);
@@ -347,6 +343,11 @@ const drawWheel = () => {
   ctx.strokeStyle = "#6366f1";
   ctx.stroke();
 };
+
+// Canvas tidak mengikuti CSS dark mode, sehingga perlu digambar ulang.
+watch(isDarkMode, () => {
+  if (process.client) requestAnimationFrame(drawWheel);
+});
 
 const rotateWheel = () => {
   spinTime += 30;
